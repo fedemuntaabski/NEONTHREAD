@@ -32,6 +32,7 @@ public class MenuScreen extends JPanel {
     private final JLabel[] cityInfoLabels;
     private Timer scanlineTimer;
     private Timer dataStreamTimer;
+    private Runnable onSettingsRequested;
     
     public MenuScreen() {
         setLayout(new GridBagLayout());
@@ -171,6 +172,10 @@ public class MenuScreen extends JPanel {
         requestFocusInWindow();
     }
     
+    public void setOnSettingsRequested(Runnable onSettingsRequested) {
+        this.onSettingsRequested = onSettingsRequested;
+    }
+    
     public void cleanup() {
         cursor.stop();
         if (scanlineTimer != null) {
@@ -236,10 +241,11 @@ public class MenuScreen extends JPanel {
                     JOptionPane.INFORMATION_MESSAGE);
                 break;
             case 2:
-                JOptionPane.showMessageDialog(this, 
-                    "Settings panel...\n(Settings not implemented yet)", 
-                    "Settings", 
-                    JOptionPane.INFORMATION_MESSAGE);
+                // Open settings
+                if (onSettingsRequested != null) {
+                    cleanup();
+                    onSettingsRequested.run();
+                }
                 break;
             case 3:
                 int result = JOptionPane.showConfirmDialog(this, 

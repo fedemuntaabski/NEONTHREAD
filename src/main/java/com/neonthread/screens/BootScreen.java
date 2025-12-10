@@ -44,7 +44,7 @@ public class BootScreen extends JPanel {
         
         textArea = new JTextArea();
         textArea.setBackground(GameConstants.COLOR_BACKGROUND);
-        textArea.setForeground(GameConstants.COLOR_CYAN_NEON);
+        textArea.setForeground(GameConstants.COLOR_TEXT_PRIMARY);
         textArea.setFont(GameConstants.FONT_TEXT);
         textArea.setEditable(false);
         textArea.setMargin(new Insets(20, 20, 20, 20));

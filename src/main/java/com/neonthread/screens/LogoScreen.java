@@ -35,7 +35,7 @@ public class LogoScreen extends JPanel {
         
         logoArea = new JTextArea();
         logoArea.setBackground(GameConstants.COLOR_BACKGROUND);
-        logoArea.setForeground(GameConstants.COLOR_CYAN_NEON);
+        logoArea.setForeground(GameConstants.COLOR_TEXT_PRIMARY);
         logoArea.setFont(new Font(GameConstants.FONT_FAMILY, Font.BOLD, 14));
         logoArea.setEditable(false);
         logoArea.setText(cleanLogo);

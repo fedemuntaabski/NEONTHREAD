@@ -4,6 +4,7 @@ import com.neonthread.screens.BootScreen;
 import com.neonthread.screens.BootstrapScreen;
 import com.neonthread.screens.LogoScreen;
 import com.neonthread.screens.MenuScreen;
+import com.neonthread.screens.SettingsScreen;
 import com.neonthread.screens.TitleScreen;
 
 import javax.swing.*;
@@ -20,6 +21,7 @@ public class NeonThreadGame extends JFrame {
     private LogoScreen logoScreen;
     private TitleScreen titleScreen;
     private MenuScreen menuScreen;
+    private SettingsScreen settingsScreen;
     
     public NeonThreadGame() {
         initializeWindow();
@@ -42,6 +44,10 @@ public class NeonThreadGame extends JFrame {
         logoScreen = new LogoScreen(this::changeState);
         titleScreen = new TitleScreen(this::changeState);
         menuScreen = new MenuScreen();
+        settingsScreen = new SettingsScreen(v -> showMenu(), this);
+        
+        // Connect menu to settings
+        menuScreen.setOnSettingsRequested(this::showSettings);
     }
     
     private void changeState(GameState newState) {
@@ -81,6 +87,22 @@ public class NeonThreadGame extends JFrame {
                 break;
         }
         
+        revalidate();
+        repaint();
+    }
+    
+    private void showSettings() {
+        getContentPane().removeAll();
+        getContentPane().add(settingsScreen);
+        settingsScreen.show();
+        revalidate();
+        repaint();
+    }
+    
+    private void showMenu() {
+        getContentPane().removeAll();
+        getContentPane().add(menuScreen);
+        menuScreen.show();
         revalidate();
         repaint();
     }

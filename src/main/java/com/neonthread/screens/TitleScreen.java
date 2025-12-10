@@ -35,7 +35,7 @@ public class TitleScreen extends JPanel {
         
         textArea = new JTextArea();
         textArea.setBackground(GameConstants.COLOR_BACKGROUND);
-        textArea.setForeground(GameConstants.COLOR_CYAN_NEON);
+        textArea.setForeground(GameConstants.COLOR_TEXT_PRIMARY);
         textArea.setFont(new Font(GameConstants.FONT_FAMILY, Font.BOLD, 16));
         textArea.setEditable(false);
         textArea.setText(titleArt);
