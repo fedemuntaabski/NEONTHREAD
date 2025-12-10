@@ -19,22 +19,11 @@ public class GlitchEffect {
     
     /**
      * Aplica glitch a un texto reemplazando caracteres aleatorios.
-     * Respeta la configuración de intensidad de glitch.
      * @param text Texto original
      * @param intensity Intensidad (0.0 a 1.0) - porcentaje de caracteres a glitchear
      * @return Texto glitcheado
      */
     public static String applyGlitch(String text, double intensity) {
-        // Verificar si los glitches están deshabilitados
-        GameSettings settings = GameSettings.getInstance();
-        if (settings.isDisableGlitchEffects()) {
-            return text;
-        }
-        
-        // Aplicar intensidad configurada
-        double configuredIntensity = settings.getGlitchIntensity() / 100.0;
-        intensity = intensity * configuredIntensity;
-        
         if (text == null || text.isEmpty() || intensity <= 0) {
             return text;
         }

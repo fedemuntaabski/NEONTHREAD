@@ -25,6 +25,14 @@ public class CyberpunkComboBox<T> extends JComboBox<T> {
         setBorder(new LineBorder(GameConstants.COLOR_CYAN_NEON, 2));
         setFocusable(false);
         
+        // Set background for the editor component
+        if (getEditor() != null && getEditor().getEditorComponent() instanceof JTextField) {
+            JTextField editor = (JTextField) getEditor().getEditorComponent();
+            editor.setBackground(GameConstants.COLOR_BACKGROUND);
+            editor.setForeground(GameConstants.COLOR_TEXT_PRIMARY);
+            editor.setOpaque(true);
+        }
+        
         // Renderer personalizado
         setRenderer(new DefaultListCellRenderer() {
             @Override
@@ -33,7 +41,7 @@ public class CyberpunkComboBox<T> extends JComboBox<T> {
                 JLabel label = (JLabel) super.getListCellRendererComponent(
                     list, value, index, isSelected, cellHasFocus);
                 
-                label.setBackground(isSelected ? GameConstants.COLOR_PANEL : GameConstants.COLOR_BACKGROUND);
+                label.setBackground(GameConstants.COLOR_BACKGROUND);
                 label.setForeground(isSelected ? GameConstants.COLOR_CYAN_NEON : GameConstants.COLOR_TEXT_PRIMARY);
                 label.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
                 

@@ -28,13 +28,8 @@ public class TypewriterEffect {
     }
     
     private static int getDelayFromSettings() {
-        GameSettings settings = GameSettings.getInstance();
-        switch (settings.getTextSpeed()) {
-            case 0: return 50;  // Slow
-            case 2: return 10;  // Fast
-            case 1:
-            default: return 25; // Normal
-        }
+        // Velocidad fija normal (settings simplificado)
+        return 25;
     }
     
     public void start() {

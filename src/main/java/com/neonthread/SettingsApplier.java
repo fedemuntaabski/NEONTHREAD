@@ -4,8 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Aplica configuraciones del juego a la ventana y componentes.
- * Sigue patrón Command y KISS.
+ * Aplica configuraciones simples del juego (KISS).
+ * Solo maneja resolución, pantalla completa, volumen y tamaño de texto.
  */
 public class SettingsApplier {
     private final JFrame window;
@@ -17,147 +17,93 @@ public class SettingsApplier {
     }
     
     /**
-     * Aplica todas las configuraciones actuales.
+     * Aplica todas las configuraciones.
      */
     public void applyAll() {
-        applyVideoSettings();
-        applyUISettings();
-        // Audio settings se aplicarían aquí si tuviéramos un sistema de audio real
+        applyResolution();
+        applyFullscreen();
+        applyVolume();
+        applyTextSize();
     }
     
     /**
-     * Aplica configuraciones de video.
+     * Aplica la resolución (solo en modo ventana).
      */
-    public void applyVideoSettings() {
-        // Aplicar resolución
+    private void applyResolution() {
+        if (settings.isFullscreen()) {
+            return; // En fullscreen se usa resolución nativa
+        }
+        
         String resolution = settings.getResolution();
         String[] parts = resolution.split("x");
+        
         if (parts.length == 2) {
             try {
                 int width = Integer.parseInt(parts[0]);
                 int height = Integer.parseInt(parts[1]);
                 window.setSize(width, height);
-                window.setLocationRelativeTo(null); // Centrar
+                window.setLocationRelativeTo(null);
             } catch (NumberFormatException e) {
-                System.err.println("Invalid resolution format: " + resolution);
+                System.err.println("Resolución inválida: " + resolution);
             }
         }
-        
-        // Aplicar modo de ventana
-        String windowMode = settings.getWindowMode();
-        GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        
-        switch (windowMode) {
-            case "Fullscreen":
-                window.dispose();
-                window.setUndecorated(true);
-                window.setVisible(true);
-                if (device.isFullScreenSupported()) {
-                    device.setFullScreenWindow(window);
-                }
-                break;
-                
-            case "Borderless":
-                if (device.getFullScreenWindow() == window) {
-                    device.setFullScreenWindow(null);
-                }
-                window.dispose();
-                window.setUndecorated(true);
-                window.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                window.setVisible(true);
-                break;
-                
-            case "Windowed":
-            default:
-                if (device.getFullScreenWindow() == window) {
-                    device.setFullScreenWindow(null);
-                }
-                window.dispose();
-                window.setUndecorated(false);
-                window.setExtendedState(JFrame.NORMAL);
-                window.setVisible(true);
-                window.setLocationRelativeTo(null);
-                break;
-        }
-        
-        // VSync (solo log, requeriría configuración de rendering más avanzada)
-        if (settings.isVsync()) {
-            System.out.println("VSync enabled");
-        }
     }
     
     /**
-     * Aplica configuraciones de UI (escala, fuentes, etc).
+     * Aplica modo pantalla completa o ventana.
      */
-    public void applyUISettings() {
-        float uiScale = settings.getUiScale() / 100.0f;
+    private void applyFullscreen() {
+        GraphicsDevice device = GraphicsEnvironment
+            .getLocalGraphicsEnvironment()
+            .getDefaultScreenDevice();
         
-        // Aplicar escala a las fuentes
-        Font baseFont = new Font(GameConstants.FONT_FAMILY, Font.PLAIN, 14);
-        Font scaledFont = baseFont.deriveFont(baseFont.getSize() * uiScale);
-        
-        // Actualizar constantes de fuente (para futuros componentes)
-        UIManager.put("Label.font", scaledFont);
-        UIManager.put("Button.font", scaledFont);
-        UIManager.put("TextField.font", scaledFont);
-        
-        // Aplicar accesibilidad
-        if (settings.isHighContrast()) {
-            applyHighContrastMode();
+        if (settings.isFullscreen()) {
+            // Activar pantalla completa
+            window.dispose();
+            window.setUndecorated(true);
+            window.setVisible(true);
+            
+            if (device.isFullScreenSupported()) {
+                device.setFullScreenWindow(window);
+            }
         } else {
-            restoreNormalColors();
+            // Modo ventana
+            if (device.getFullScreenWindow() == window) {
+                device.setFullScreenWindow(null);
+            }
+            
+            window.dispose();
+            window.setUndecorated(false);
+            window.setVisible(true);
+            applyResolution();
         }
+    }
+    
+    /**
+     * Aplica el volumen maestro.
+     */
+    private void applyVolume() {
+        int volume = settings.getMasterVolume();
+        // En un juego real aquí se aplicaría al sistema de audio
+        System.out.println("Volumen maestro: " + volume + "%");
+    }
+    
+    /**
+     * Aplica el tamaño de texto.
+     */
+    private void applyTextSize() {
+        int baseSize = settings.isLargeText() ? 18 : 14;
         
-        // Refrescar todos los componentes
+        Font textFont = new Font(GameConstants.FONT_FAMILY, Font.PLAIN, baseSize);
+        Font buttonFont = new Font(GameConstants.FONT_FAMILY, Font.BOLD, baseSize + 4);
+        
+        UIManager.put("Label.font", textFont);
+        UIManager.put("Button.font", buttonFont);
+        UIManager.put("RadioButton.font", textFont);
+        UIManager.put("CheckBox.font", textFont);
+        
         SwingUtilities.updateComponentTreeUI(window);
-    }
-    
-    /**
-     * Aplica modo de alto contraste.
-     */
-    private void applyHighContrastMode() {
-        window.getContentPane().setBackground(GameConstants.COLOR_HIGH_CONTRAST_BG);
-        // Los componentes individuales deberían actualizar sus colores según esta preferencia
-    }
-    
-    /**
-     * Restaura colores normales.
-     */
-    private void restoreNormalColors() {
-        window.getContentPane().setBackground(GameConstants.COLOR_BACKGROUND);
-    }
-    
-    /**
-     * Aplica brillo ajustando el alpha de los componentes.
-     */
-    public void applyBrightness(Component component) {
-        float brightness = settings.getBrightness() / 100.0f;
-        // Ajustar brillo mediante alpha composite (simplificado)
-        if (component instanceof JComponent) {
-            JComponent jcomp = (JComponent) component;
-            jcomp.setOpaque(brightness > 0.3f);
-        }
-    }
-    
-    /**
-     * Obtiene el delay del typewriter según la velocidad de texto.
-     */
-    public int getTypewriterDelay() {
-        switch (settings.getTextSpeed()) {
-            case 0: return 50;  // Slow
-            case 2: return 10;  // Fast
-            case 1:
-            default: return 25; // Normal
-        }
-    }
-    
-    /**
-     * Obtiene la intensidad de glitch como decimal.
-     */
-    public double getGlitchIntensity() {
-        if (settings.isDisableGlitchEffects()) {
-            return 0.0;
-        }
-        return settings.getGlitchIntensity() / 100.0;
+        window.revalidate();
+        window.repaint();
     }
 }

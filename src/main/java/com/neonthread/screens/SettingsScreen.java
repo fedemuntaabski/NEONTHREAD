@@ -4,28 +4,27 @@ import com.neonthread.GameConstants;
 import com.neonthread.GameSettings;
 import com.neonthread.SettingsApplier;
 import com.neonthread.ui.CyberpunkButton;
+import com.neonthread.ui.CyberpunkComboBox;
+import com.neonthread.ui.CyberpunkSlider;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.util.function.Consumer;
 
 /**
- * Pantalla de configuración con tabs para diferentes categorías.
+ * Pantalla de configuración simple y minimalista (KISS).
+ * Solo opciones esenciales: resolución, pantalla completa, volumen y tamaño de texto.
  */
 public class SettingsScreen extends JPanel {
     private final Consumer<Void> onBack;
     private final GameSettings settings;
     private final SettingsApplier applier;
-    private final JPanel contentPanel;
-    private final JLabel[] tabLabels;
-    private int selectedTab = 0;
-    private final JLabel savingLabel;
-    private Timer savingTimer;
     
-    private final String[] tabs = {"Video", "Audio", "Gameplay", "Controls", "Accessibility"};
+    private CyberpunkComboBox<String> resolutionCombo;
+    private JCheckBox fullscreenCheck;
+    private CyberpunkSlider volumeSlider;
+    private JRadioButton normalTextRadio;
+    private JRadioButton largeTextRadio;
     
     public SettingsScreen(Consumer<Void> onBack, JFrame window) {
         this.onBack = onBack;
@@ -34,233 +33,173 @@ public class SettingsScreen extends JPanel {
         
         setLayout(new BorderLayout());
         setBackground(GameConstants.COLOR_BACKGROUND);
-        setFocusable(true);
         
-        // Header
+        buildUI();
+    }
+    
+    private void buildUI() {
+        // Título
         JLabel titleLabel = new JLabel("SETTINGS", SwingConstants.CENTER);
-        titleLabel.setFont(new Font(GameConstants.FONT_FAMILY, Font.BOLD, 32));
+        titleLabel.setFont(new Font(GameConstants.FONT_FAMILY, Font.BOLD, 40));
         titleLabel.setForeground(GameConstants.COLOR_TEXT_PRIMARY);
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(30, 0, 40, 0));
         add(titleLabel, BorderLayout.NORTH);
         
-        // Center container with tabs and content
-        JPanel centerContainer = new JPanel(new BorderLayout());
-        centerContainer.setBackground(GameConstants.COLOR_BACKGROUND);
+        // Panel central con todas las opciones
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+        centerPanel.setBackground(GameConstants.COLOR_BACKGROUND);
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 100, 20, 100));
         
-        // Tabs panel
-        JPanel tabsPanel = new JPanel(new GridLayout(tabs.length, 1, 0, 5));
-        tabsPanel.setBackground(GameConstants.COLOR_BACKGROUND);
-        tabsPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 10));
+        // Resolución
+        addSeparator(centerPanel);
+        addSettingRow(centerPanel, "Resolución", createResolutionControl());
+        addSeparator(centerPanel);
         
-        tabLabels = new JLabel[tabs.length];
-        for (int i = 0; i < tabs.length; i++) {
-            final int index = i;
-            tabLabels[i] = new JLabel("• " + tabs[i]);
-            tabLabels[i].setFont(GameConstants.FONT_MENU);
-            tabLabels[i].setForeground(GameConstants.COLOR_TEXT_SECONDARY);
-            tabLabels[i].setCursor(new Cursor(Cursor.HAND_CURSOR));
-            tabLabels[i].addMouseListener(new java.awt.event.MouseAdapter() {
-                public void mouseClicked(java.awt.event.MouseEvent evt) {
-                    selectTab(index);
-                }
-                public void mouseEntered(java.awt.event.MouseEvent evt) {
-                    if (index != selectedTab) {
-                        tabLabels[index].setForeground(GameConstants.COLOR_BUTTON_HOVER);
-                    }
-                }
-                public void mouseExited(java.awt.event.MouseEvent evt) {
-                    if (index != selectedTab) {
-                        tabLabels[index].setForeground(GameConstants.COLOR_TEXT_SECONDARY);
-                    }
-                }
-            });
-            tabsPanel.add(tabLabels[i]);
-        }
+        // Pantalla completa
+        addSettingRow(centerPanel, "Pantalla completa", createFullscreenControl());
+        addSeparator(centerPanel);
         
-        centerContainer.add(tabsPanel, BorderLayout.WEST);
+        // Volumen maestro
+        addSettingRow(centerPanel, "Volumen maestro", createVolumeControl());
+        addSeparator(centerPanel);
         
-        // Content panel (scrollable)
-        contentPanel = new JPanel();
-        contentPanel.setLayout(new BorderLayout());
-        contentPanel.setBackground(GameConstants.COLOR_BACKGROUND);
-        contentPanel.setBorder(new LineBorder(GameConstants.COLOR_CYAN_NEON, 2));
+        // Tamaño de texto
+        addSettingRow(centerPanel, "Tamaño de texto", createTextSizeControl());
+        addSeparator(centerPanel);
         
-        JScrollPane scrollPane = new JScrollPane(contentPanel);
-        scrollPane.setBackground(GameConstants.COLOR_BACKGROUND);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 20));
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        add(centerPanel, BorderLayout.CENTER);
         
-        centerContainer.add(scrollPane, BorderLayout.CENTER);
-        add(centerContainer, BorderLayout.CENTER);
-        
-        // Bottom panel with buttons and saving indicator
-        JPanel bottomPanel = new JPanel(new BorderLayout());
+        // Botones inferiores
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 20));
         bottomPanel.setBackground(GameConstants.COLOR_BACKGROUND);
-        bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 40, 0));
         
-        // Saving indicator (top right)
-        savingLabel = new JLabel(" ");
-        savingLabel.setFont(GameConstants.FONT_TEXT);
-        savingLabel.setForeground(GameConstants.COLOR_CYAN_NEON);
-        savingLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        bottomPanel.add(savingLabel, BorderLayout.NORTH);
+        CyberpunkButton saveButton = new CyberpunkButton("GUARDAR", GameConstants.COLOR_PANEL);
+        saveButton.setBorder(BorderFactory.createLineBorder(GameConstants.COLOR_CYAN_NEON, 2));
+        saveButton.addActionListener(e -> saveAndApply());
         
-        // Buttons panel
-        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        buttonsPanel.setBackground(GameConstants.COLOR_BACKGROUND);
+        CyberpunkButton backButton = new CyberpunkButton("VOLVER", GameConstants.COLOR_PANEL);
+        backButton.setBorder(BorderFactory.createLineBorder(GameConstants.COLOR_CYAN_NEON, 2));
+        backButton.addActionListener(e -> onBack.accept(null));
         
-        CyberpunkButton defaultsButton = new CyberpunkButton("DEFAULTS");
-        defaultsButton.addActionListener(e -> resetToDefaults());
+        bottomPanel.add(saveButton);
+        bottomPanel.add(backButton);
         
-        CyberpunkButton applyButton = new CyberpunkButton("APPLY");
-        applyButton.addActionListener(e -> applySettings());
-        
-        CyberpunkButton saveButton = new CyberpunkButton("SAVE");
-        saveButton.addActionListener(e -> save());
-        
-        CyberpunkButton cancelButton = new CyberpunkButton("CANCEL");
-        cancelButton.addActionListener(e -> cancel());
-        
-        buttonsPanel.add(defaultsButton);
-        buttonsPanel.add(applyButton);
-        buttonsPanel.add(saveButton);
-        buttonsPanel.add(cancelButton);
-        
-        bottomPanel.add(buttonsPanel, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
+    }
+    
+    private JComponent createResolutionControl() {
+        String[] resolutions = {"1280x720", "1600x900", "1920x1080"};
+        resolutionCombo = new CyberpunkComboBox<>(resolutions);
+        resolutionCombo.setSelectedItem(settings.getResolution());
+        resolutionCombo.setPreferredSize(new Dimension(200, 35));
         
-        // Keyboard navigation
-        addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_UP:
-                        selectTab((selectedTab - 1 + tabs.length) % tabs.length);
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        selectTab((selectedTab + 1) % tabs.length);
-                        break;
-                    case KeyEvent.VK_ESCAPE:
-                        cancel();
-                        break;
-                }
-            }
+        // Deshabilitar si está en pantalla completa
+        resolutionCombo.setEnabled(!settings.isFullscreen());
+        
+        return resolutionCombo;
+    }
+    
+    private JComponent createFullscreenControl() {
+        fullscreenCheck = new JCheckBox();
+        fullscreenCheck.setSelected(settings.isFullscreen());
+        fullscreenCheck.setBackground(GameConstants.COLOR_BACKGROUND);
+        fullscreenCheck.setForeground(GameConstants.COLOR_TEXT_PRIMARY);
+        fullscreenCheck.setFont(GameConstants.FONT_TEXT);
+        fullscreenCheck.setFocusPainted(false);
+        
+        // Al cambiar, habilitar/deshabilitar resolución
+        fullscreenCheck.addActionListener(e -> {
+            resolutionCombo.setEnabled(!fullscreenCheck.isSelected());
         });
         
-        // Load first tab
-        selectTab(0);
+        return fullscreenCheck;
     }
     
-    private void selectTab(int index) {
-        selectedTab = index;
+    private JComponent createVolumeControl() {
+        volumeSlider = new CyberpunkSlider(0, 100, settings.getMasterVolume());
+        volumeSlider.setPreferredSize(new Dimension(300, 40));
         
-        // Update tab colors
-        for (int i = 0; i < tabLabels.length; i++) {
-            if (i == selectedTab) {
-                tabLabels[i].setForeground(GameConstants.COLOR_CYAN_NEON);
-                tabLabels[i].setFont(new Font(GameConstants.FONT_FAMILY, Font.BOLD, 20));
-            } else {
-                tabLabels[i].setForeground(GameConstants.COLOR_TEXT_SECONDARY);
-                tabLabels[i].setFont(GameConstants.FONT_MENU);
-            }
-        }
+        return volumeSlider;
+    }
+    
+    private JComponent createTextSizeControl() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(GameConstants.COLOR_BACKGROUND);
         
-        // Load appropriate content
-        contentPanel.removeAll();
-        JPanel settingsPanel = createSettingsPanel(tabs[selectedTab]);
-        contentPanel.add(settingsPanel, BorderLayout.CENTER);
-        contentPanel.revalidate();
-        contentPanel.repaint();
-    }
-    
-    private JPanel createSettingsPanel(String tab) {
-        switch (tab) {
-            case "Video": return createVideoSettings();
-            case "Audio": return createAudioSettings();
-            case "Gameplay": return createGameplaySettings();
-            case "Controls": return createControlsSettings();
-            case "Accessibility": return createAccessibilitySettings();
-            default: return new JPanel();
-        }
-    }
-    
-    private JPanel createVideoSettings() {
-        return new com.neonthread.screens.settings.VideoSettingsPanel(settings);
-    }
-    
-    private JPanel createAudioSettings() {
-        return new com.neonthread.screens.settings.AudioSettingsPanel(settings);
-    }
-    
-    private JPanel createGameplaySettings() {
-        return new com.neonthread.screens.settings.GameplaySettingsPanel(settings);
-    }
-    
-    private JPanel createControlsSettings() {
-        return new com.neonthread.screens.settings.ControlsSettingsPanel(settings);
-    }
-    
-    private JPanel createAccessibilitySettings() {
-        return new com.neonthread.screens.settings.AccessibilitySettingsPanel(settings);
-    }
-    
-    private void resetToDefaults() {
-        int result = JOptionPane.showConfirmDialog(this,
-            "Reset all settings to defaults?",
-            "Confirm Reset",
-            JOptionPane.YES_NO_OPTION);
+        normalTextRadio = new JRadioButton("Normal");
+        largeTextRadio = new JRadioButton("Grande");
         
-        if (result == JOptionPane.YES_OPTION) {
-            settings.resetToDefaults();
-            selectTab(selectedTab); // Reload current tab
-            showSaving();
-        }
+        normalTextRadio.setSelected(!settings.isLargeText());
+        largeTextRadio.setSelected(settings.isLargeText());
+        
+        styleRadioButton(normalTextRadio);
+        styleRadioButton(largeTextRadio);
+        
+        ButtonGroup group = new ButtonGroup();
+        group.add(normalTextRadio);
+        group.add(largeTextRadio);
+        
+        panel.add(normalTextRadio);
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(largeTextRadio);
+        
+        return panel;
     }
     
-    private void applySettings() {
-        showSaving();
+    private void styleRadioButton(JRadioButton radio) {
+        radio.setBackground(GameConstants.COLOR_BACKGROUND);
+        radio.setForeground(GameConstants.COLOR_TEXT_PRIMARY);
+        radio.setFont(GameConstants.FONT_TEXT);
+        radio.setFocusPainted(false);
+    }
+    
+    private void addSettingRow(JPanel parent, String label, JComponent control) {
+        JPanel row = new JPanel(new BorderLayout(20, 0));
+        row.setBackground(GameConstants.COLOR_BACKGROUND);
+        row.setMaximumSize(new Dimension(600, 80));
+        
+        JLabel labelComp = new JLabel(label + ":");
+        labelComp.setFont(GameConstants.FONT_TEXT);
+        labelComp.setForeground(GameConstants.COLOR_TEXT_SECONDARY);
+        
+        row.add(labelComp, BorderLayout.WEST);
+        row.add(control, BorderLayout.EAST);
+        
+        parent.add(row);
+        parent.add(Box.createVerticalStrut(15));
+    }
+    
+    private void addSeparator(JPanel parent) {
+        JSeparator separator = new JSeparator();
+        separator.setForeground(GameConstants.COLOR_CYAN_NEON);
+        separator.setMaximumSize(new Dimension(600, 1));
+        parent.add(separator);
+        parent.add(Box.createVerticalStrut(10));
+    }
+    
+    private void saveAndApply() {
+        // Guardar valores
+        settings.setResolution((String) resolutionCombo.getSelectedItem());
+        settings.setFullscreen(fullscreenCheck.isSelected());
+        settings.setMasterVolume(volumeSlider.getValue());
+        settings.setLargeText(largeTextRadio.isSelected());
+        
+        // Persistir
+        settings.saveSettings();
+        
+        // Aplicar cambios
         applier.applyAll();
         
-        // Mostrar mensaje de confirmación
-        Timer delay = new Timer(500, e -> {
-            ((Timer)e.getSource()).stop();
-            JOptionPane.showMessageDialog(this,
-                "Settings applied successfully!\nSome changes may require a restart.",
-                "Applied",
-                JOptionPane.INFORMATION_MESSAGE);
+        // Volver al menú
+        Timer timer = new Timer(200, e -> {
+            ((Timer) e.getSource()).stop();
+            onBack.accept(null);
         });
-        delay.setRepeats(false);
-        delay.start();
-    }
-    
-    private void save() {
-        showSaving();
-        // Settings are already saved in real-time through the panels
-        Timer delay = new Timer(800, e -> {
-            ((Timer)e.getSource()).stop();
-            cancel();
-        });
-        delay.setRepeats(false);
-        delay.start();
-    }
-    
-    private void cancel() {
-        onBack.accept(null);
-    }
-    
-    private void showSaving() {
-        savingLabel.setText("[SAVING…]");
-        
-        if (savingTimer != null) {
-            savingTimer.stop();
-        }
-        
-        savingTimer = new Timer(1500, e -> {
-            savingLabel.setText(" ");
-            ((Timer)e.getSource()).stop();
-        });
-        savingTimer.setRepeats(false);
-        savingTimer.start();
+        timer.setRepeats(false);
+        timer.start();
     }
     
     public void show() {
