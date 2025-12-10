@@ -26,14 +26,20 @@ public class VideoSettingsPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         
         // Resolution
-        addSetting(gbc, "Resolution:", 
-            new CyberpunkComboBox<>(new String[]{"1024x768", "1280x720", "1920x1080", "2560x1440"}),
-            settings.getResolution());
+        CyberpunkComboBox<String> resolutionCombo = new CyberpunkComboBox<>(
+            new String[]{"1024x768", "1280x720", "1920x1080", "2560x1440"});
+        resolutionCombo.setSelectedItem(settings.getResolution());
+        resolutionCombo.addActionListener(e -> 
+            settings.setResolution((String)resolutionCombo.getSelectedItem()));
+        addSetting(gbc, "Resolution:", resolutionCombo, null);
         
         // Window Mode
-        addSetting(gbc, "Window Mode:", 
-            new CyberpunkComboBox<>(new String[]{"Windowed", "Borderless", "Fullscreen"}),
-            settings.getWindowMode());
+        CyberpunkComboBox<String> windowModeCombo = new CyberpunkComboBox<>(
+            new String[]{"Windowed", "Borderless", "Fullscreen"});
+        windowModeCombo.setSelectedItem(settings.getWindowMode());
+        windowModeCombo.addActionListener(e -> 
+            settings.setWindowMode((String)windowModeCombo.getSelectedItem()));
+        addSetting(gbc, "Window Mode:", windowModeCombo, null);
         
         // VSync
         CyberpunkToggle vsyncToggle = new CyberpunkToggle(settings.isVsync(), 
@@ -78,13 +84,6 @@ public class VideoSettingsPanel extends JPanel {
         labelComp.setForeground(GameConstants.COLOR_TEXT_SECONDARY);
         gbc.gridx = 0;
         add(labelComp, gbc);
-        
-        if (component instanceof JComboBox) {
-            JComboBox<?> combo = (JComboBox<?>) component;
-            if (value != null) {
-                combo.setSelectedItem(value);
-            }
-        }
         
         gbc.gridx = 1;
         add(component, gbc);

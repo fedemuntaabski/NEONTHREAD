@@ -2,6 +2,7 @@ package com.neonthread.screens;
 
 import com.neonthread.GameConstants;
 import com.neonthread.GameSettings;
+import com.neonthread.SettingsApplier;
 import com.neonthread.ui.CyberpunkButton;
 
 import javax.swing.*;
@@ -17,6 +18,7 @@ import java.util.function.Consumer;
 public class SettingsScreen extends JPanel {
     private final Consumer<Void> onBack;
     private final GameSettings settings;
+    private final SettingsApplier applier;
     private final JPanel contentPanel;
     private final JLabel[] tabLabels;
     private int selectedTab = 0;
@@ -25,9 +27,10 @@ public class SettingsScreen extends JPanel {
     
     private final String[] tabs = {"Video", "Audio", "Gameplay", "Controls", "Accessibility"};
     
-    public SettingsScreen(Consumer<Void> onBack) {
+    public SettingsScreen(Consumer<Void> onBack, JFrame window) {
         this.onBack = onBack;
         this.settings = GameSettings.getInstance();
+        this.applier = new SettingsApplier(window);
         
         setLayout(new BorderLayout());
         setBackground(GameConstants.COLOR_BACKGROUND);
@@ -109,6 +112,9 @@ public class SettingsScreen extends JPanel {
         CyberpunkButton defaultsButton = new CyberpunkButton("DEFAULTS");
         defaultsButton.addActionListener(e -> resetToDefaults());
         
+        CyberpunkButton applyButton = new CyberpunkButton("APPLY");
+        applyButton.addActionListener(e -> applySettings());
+        
         CyberpunkButton saveButton = new CyberpunkButton("SAVE");
         saveButton.addActionListener(e -> save());
         
@@ -116,6 +122,7 @@ public class SettingsScreen extends JPanel {
         cancelButton.addActionListener(e -> cancel());
         
         buttonsPanel.add(defaultsButton);
+        buttonsPanel.add(applyButton);
         buttonsPanel.add(saveButton);
         buttonsPanel.add(cancelButton);
         
@@ -208,6 +215,22 @@ public class SettingsScreen extends JPanel {
             selectTab(selectedTab); // Reload current tab
             showSaving();
         }
+    }
+    
+    private void applySettings() {
+        showSaving();
+        applier.applyAll();
+        
+        // Mostrar mensaje de confirmación
+        Timer delay = new Timer(500, e -> {
+            ((Timer)e.getSource()).stop();
+            JOptionPane.showMessageDialog(this,
+                "Settings applied successfully!\nSome changes may require a restart.",
+                "Applied",
+                JOptionPane.INFORMATION_MESSAGE);
+        });
+        delay.setRepeats(false);
+        delay.start();
     }
     
     private void save() {

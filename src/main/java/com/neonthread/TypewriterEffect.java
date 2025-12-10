@@ -5,10 +5,11 @@ import java.util.function.Consumer;
 
 /**
  * Efecto typewriter reutilizable siguiendo DRY.
+ * Ahora respeta la configuración de velocidad de texto.
  */
 public class TypewriterEffect {
     private final String fullText;
-    private final int delayMs;
+    private int delayMs;
     private final Consumer<String> onUpdate;
     private final Runnable onComplete;
     
@@ -16,7 +17,7 @@ public class TypewriterEffect {
     private Timer timer;
     
     public TypewriterEffect(String text, Consumer<String> onUpdate, Runnable onComplete) {
-        this(text, GameConstants.TYPEWRITER_DELAY_MS, onUpdate, onComplete);
+        this(text, getDelayFromSettings(), onUpdate, onComplete);
     }
     
     public TypewriterEffect(String text, int delayMs, Consumer<String> onUpdate, Runnable onComplete) {
@@ -24,6 +25,16 @@ public class TypewriterEffect {
         this.delayMs = delayMs;
         this.onUpdate = onUpdate;
         this.onComplete = onComplete;
+    }
+    
+    private static int getDelayFromSettings() {
+        GameSettings settings = GameSettings.getInstance();
+        switch (settings.getTextSpeed()) {
+            case 0: return 50;  // Slow
+            case 2: return 10;  // Fast
+            case 1:
+            default: return 25; // Normal
+        }
     }
     
     public void start() {

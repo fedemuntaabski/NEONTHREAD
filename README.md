@@ -47,9 +47,53 @@ mvn exec:java -Dexec.mainClass="com.neonthread.NeonThreadGame"
 
 ## 🎮 Controles
 
-- **↑/↓** - Navegar por el menú
+- **↑/↓** - Navegar por menús y tabs de settings
 - **1-4** o **Enter** - Seleccionar opción
-- **ESC** - Cancelar (en algunos diálogos)
+- **ESC** - Cancelar o salir de settings
+- **Click** - Interactuar con sliders, toggles y botones
+
+NEONTHREAD incluye un sistema de configuración completo y funcional con 5 categorías:
+
+### 📺 Video Settings
+- **Resolution** - Cambia la resolución de la ventana en tiempo real (1024x768 a 2560x1440)
+- **Window Mode** - Alterna entre Windowed, Borderless y Fullscreen
+- **VSync** - Activa/desactiva sincronización vertical
+- **Brightness** - Ajusta el brillo con preview visual en tiempo real
+- **UI Scale** - Escala la interfaz de 80% a 200%
+
+### 🔊 Audio Settings
+- **Master/Music/SFX/Voice Volume** - Sliders independientes de 0-100%
+- **Dynamic Mix** - Reduce la música durante diálogos
+- **Test Sound** - Botón para probar el volumen actual
+
+### 🎮 Gameplay Settings
+- **Text Speed** - Controla la velocidad del efecto typewriter (Slow/Normal/Fast)
+- **Auto-Advance** - Avanza diálogos automáticamente
+- **Show Confirmed Choices** - Muestra las elecciones seleccionadas
+- **Difficulty** - Story, Balanced o Hardcore
+- **Permadeath Mode** - Activa modo muerte permanente
+- **Glitch Intensity** - Controla la intensidad de los efectos glitch (0-100%)
+
+### 🎯 Controls Settings
+- **Key Rebinding** - Reasigna teclas para Interact, Inventory, Map y Advance Dialogue
+- **Cursor Sensitivity** - Ajusta la sensibilidad del cursor
+- **Keyboard-Only Mode** - Desactiva el mouse
+
+### ♿ Accessibility Settings
+- **High Contrast Mode** - Activa modo de alto contraste
+- **Font Size** - Ajusta el tamaño de fuente (100%, 120%, 150%)
+- **Disable Glitch Effects** - Desactiva completamente los efectos glitch
+- **Wide Subtitles** - Subtítulos más anchos para mejor legibilidad
+- **Text Guide Lines** - Líneas guía para facilitar la lectura
+
+### 🔘 Funcionalidades del Menú Settings
+- **APPLY** - Aplica los cambios inmediatamente al juego
+- **SAVE** - Guarda la configuración y regresa al menú
+- **DEFAULTS** - Restaura valores predeterminados
+- **CANCEL** - Descarta cambios y regresa
+- **[SAVING…]** - Indicador visual de guardado automático
+
+> **Nota:** Los cambios de resolución y modo de ventana se aplican inmediatamente al presionar APPLY. Algunos cambios pueden requerir reiniciar el juego.
 
 ## 🎬 Flujo de Pantallas
 
@@ -70,16 +114,30 @@ NEONTHREAD/
 │               └── neonthread/
 │                   ├── NeonThreadGame.java      # Clase principal + state manager
 │                   ├── GameState.java           # 5 estados del juego
-│                   ├── GameConstants.java       # Constantes centralizadas
-│                   ├── TypewriterEffect.java    # Efecto typewriter (DRY)
-│                   ├── BlinkingCursor.java      # Cursor parpadeante (DRY)
-│                   ├── GlitchEffect.java        # Efectos de glitch (DRY)
-│                   └── screens/
-│                       ├── BootstrapScreen.java # [NO SIGNAL] + flash
-│                       ├── BootScreen.java      # Boot log BIOS
-│                       ├── LogoScreen.java      # Logo glitcheado
-│                       ├── TitleScreen.java     # Título + tagline
-│                       └── MenuScreen.java      # Menú holográfico
+                   ├── GameConstants.java       # Constantes centralizadas
+                   ├── TypewriterEffect.java    # Efecto typewriter (DRY)
+                   ├── BlinkingCursor.java      # Cursor parpadeante (DRY)
+                   ├── GlitchEffect.java        # Efectos de glitch (DRY)
+                   ├── GameSettings.java        # Singleton de configuración
+                   ├── SettingsApplier.java     # Aplica settings al juego
+                   ├── ui/
+                   │   ├── CyberpunkSlider.java    # Slider personalizado
+                   │   ├── CyberpunkToggle.java    # Toggle switch
+                   │   ├── CyberpunkComboBox.java  # Dropdown
+                   │   └── CyberpunkButton.java    # Botón con hover
+                   └── screens/
+                       ├── BootstrapScreen.java # [NO SIGNAL] + flash
+                       ├── BootScreen.java      # Boot log BIOS
+                       ├── LogoScreen.java      # Logo glitcheado
+                       ├── TitleScreen.java     # Título + tagline
+                       ├── MenuScreen.java      # Menú holográfico
+                       ├── SettingsScreen.java  # Panel de settings
+                       └── settings/
+                           ├── VideoSettingsPanel.java
+                           ├── AudioSettingsPanel.java
+                           ├── GameplaySettingsPanel.java
+                           ├── ControlsSettingsPanel.java
+                           └── AccessibilitySettingsPanel.java
 ├── .gitignore
 └── README.md
 ```
@@ -136,9 +194,12 @@ Mensajes aleatorios de interferencia de señal
 ✅ Menú holográfico con efectos  
 ✅ Sistema de información de NightCity  
 ✅ Efectos visuales avanzados  
+✅ **Sistema de Settings completo y funcional**  
+✅ **Configuraciones aplicables en tiempo real**  
+✅ **Componentes UI personalizados reutilizables**  
 ⏳ Lógica de juego (próximamente)  
-⏳ Sistema de guardado (próximamente)  
-⏳ Configuración (próximamente)
+⏳ Sistema de guardado persistente (próximamente)  
+⏳ Audio engine (próximamente)
 
 ## 📝 Licencia
 

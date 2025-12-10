@@ -21,6 +21,7 @@ public class CyberpunkSlider extends JSlider {
         setBackground(GameConstants.COLOR_BACKGROUND);
         setForeground(GameConstants.COLOR_CYAN_NEON);
         setFocusable(false);
+        setOpaque(false); // Eliminar fondo blanco por defecto
     }
     
     private static class CyberpunkSliderUI extends BasicSliderUI {

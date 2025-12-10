@@ -44,7 +44,7 @@ public class NeonThreadGame extends JFrame {
         logoScreen = new LogoScreen(this::changeState);
         titleScreen = new TitleScreen(this::changeState);
         menuScreen = new MenuScreen();
-        settingsScreen = new SettingsScreen(v -> showMenu());
+        settingsScreen = new SettingsScreen(v -> showMenu(), this);
         
         // Connect menu to settings
         menuScreen.setOnSettingsRequested(this::showSettings);
