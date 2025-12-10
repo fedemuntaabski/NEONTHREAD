@@ -75,12 +75,16 @@ public class SettingsScreen extends JPanel {
         bottomPanel.setBackground(GameConstants.COLOR_BACKGROUND);
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 40, 0));
         
-        CyberpunkButton saveButton = new CyberpunkButton("GUARDAR", GameConstants.COLOR_PANEL);
-        saveButton.setBorder(BorderFactory.createLineBorder(GameConstants.COLOR_CYAN_NEON, 2));
+        CyberpunkButton saveButton = new CyberpunkButton("GUARDAR");
+        saveButton.setBackground(Color.WHITE);
+        saveButton.setForeground(Color.BLACK);
+        saveButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         saveButton.addActionListener(e -> saveAndApply());
         
-        CyberpunkButton backButton = new CyberpunkButton("VOLVER", GameConstants.COLOR_PANEL);
-        backButton.setBorder(BorderFactory.createLineBorder(GameConstants.COLOR_CYAN_NEON, 2));
+        CyberpunkButton backButton = new CyberpunkButton("VOLVER");
+        backButton.setBackground(Color.WHITE);
+        backButton.setForeground(Color.BLACK);
+        backButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         backButton.addActionListener(e -> onBack.accept(null));
         
         bottomPanel.add(saveButton);

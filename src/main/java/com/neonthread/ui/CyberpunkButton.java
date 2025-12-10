@@ -12,26 +12,14 @@ import java.awt.event.MouseEvent;
  * Botón personalizado con estética cyberpunk y efectos hover siguiendo DRY.
  */
 public class CyberpunkButton extends JButton {
-    private boolean isHovered = false;
-    private Color backgroundColor;
     
     public CyberpunkButton(String text) {
         super(text);
-        this.backgroundColor = GameConstants.COLOR_PANEL;
-        customizeUI();
-    }
-    
-    public CyberpunkButton(String text, Color backgroundColor) {
-        super(text);
-        this.backgroundColor = backgroundColor;
         customizeUI();
     }
     
     private void customizeUI() {
         setFont(GameConstants.FONT_MENU);
-        setForeground(GameConstants.COLOR_TEXT_PRIMARY);
-        setBackground(this.backgroundColor);
-        setBorder(new LineBorder(GameConstants.COLOR_CYAN_NEON, 2));
         setFocusPainted(false);
         setContentAreaFilled(true);
         setOpaque(true);
