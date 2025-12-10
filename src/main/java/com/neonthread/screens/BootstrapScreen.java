@@ -30,7 +30,7 @@ public class BootstrapScreen extends JPanel {
         
         signalLabel = new JLabel("[ NO SIGNAL ]");
         signalLabel.setFont(GameConstants.FONT_TEXT);
-        signalLabel.setForeground(GameConstants.COLOR_DARK_GRAY);
+        signalLabel.setForeground(GameConstants.COLOR_TEXT_SECONDARY);
         add(signalLabel, gbc);
         
         gbc.gridy = 1;
