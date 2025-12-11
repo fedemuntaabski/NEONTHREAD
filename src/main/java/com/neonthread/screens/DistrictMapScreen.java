@@ -377,7 +377,7 @@ public class DistrictMapScreen extends JPanel {
         }
         
         /**
-         * Dibuja iconos de misiones con parpadeo (KISS).
+         * Dibuja iconos de misiones con parpadeo según tipo y prioridad (KISS + mejoras).
          */
         private void drawMissionIcons(Graphics2D g2d, int baseX, int baseY) {
             District district = session.getDistrict();
@@ -385,29 +385,111 @@ public class DistrictMapScreen extends JPanel {
             
             int index = 0;
             for (Mission mission : district.getAvailableMissions()) {
-                if (mission.getStatus() == Mission.MissionStatus.COMPLETED) continue;
+                // Filtrar misiones ocultas y completadas
+                Mission.MissionStatus status = mission.getStatus();
+                if (status == Mission.MissionStatus.COMPLETED || 
+                    status == Mission.MissionStatus.HIDDEN ||
+                    status == Mission.MissionStatus.EXPIRED) {
+                    continue;
+                }
                 
                 int x = baseX + (index - 1) * 100;
                 int y = baseY;
                 
-                // Parpadeo para misiones disponibles
+                // Calcular alpha según estado y urgencia
                 long time = System.currentTimeMillis();
-                int alpha = mission.getStatus() == Mission.MissionStatus.AVAILABLE ?
-                        (int) (150 + 105 * Math.sin(time / 600.0)) : 255;
+                int alpha;
+                if (status == Mission.MissionStatus.AVAILABLE) {
+                    // Parpadeo más rápido para misiones urgentes
+                    double speed = mission.getUrgency() == Mission.MissionUrgency.CRITICAL ? 400.0 : 600.0;
+                    alpha = (int) (150 + 105 * Math.sin(time / speed));
+                } else {
+                    alpha = 255;
+                }
                 
-                // Estrella de misión
-                g2d.setColor(new Color(255, 215, 0, alpha)); // Dorado
+                // Color según tipo de misión
+                Color iconColor = getMissionColor(mission);
+                
+                // Obtener ícono visual según tipo y prioridad
+                String icon = mission.getVisualIcon();
+                
+                // Dibujar ícono de misión
+                g2d.setColor(new Color(iconColor.getRed(), iconColor.getGreen(), iconColor.getBlue(), alpha));
                 g2d.setFont(new Font(GameConstants.FONT_FAMILY, Font.BOLD, 32));
-                g2d.drawString("★", x - 16, y + 10);
+                g2d.drawString(icon, x - 16, y + 10);
+                
+                // Indicador de urgencia para misiones críticas
+                if (mission.getUrgency() == Mission.MissionUrgency.CRITICAL) {
+                    g2d.setColor(new Color(255, 50, 50, alpha));
+                    g2d.setStroke(new BasicStroke(2));
+                    g2d.drawOval(x - 20, y - 20, 40, 40);
+                }
                 
                 // Tooltip
                 if (isPointNear(x, y, hoveredLocation != null ? hoveredLocation.getX() : -1000,
                         hoveredLocation != null ? hoveredLocation.getY() : -1000, 25)) {
-                    drawTooltip(g2d, mission.getTitle(), x, y - 30);
+                    drawMissionTooltip(g2d, mission, x, y - 40);
                 }
                 
                 index++;
             }
+        }
+        
+        /**
+         * Obtiene el color según el tipo de misión.
+         */
+        private Color getMissionColor(Mission mission) {
+            switch (mission.getType()) {
+                case MAIN:
+                    return new Color(255, 215, 0); // Dorado
+                case INTEL:
+                    return new Color(31, 199, 208); // Cian
+                case COMBAT:
+                    return new Color(255, 50, 50); // Rojo
+                case SIDE:
+                default:
+                    return new Color(200, 200, 200); // Gris claro
+            }
+        }
+        
+        /**
+         * Dibuja tooltip avanzado de misión con información adicional.
+         */
+        private void drawMissionTooltip(Graphics2D g2d, Mission mission, int x, int y) {
+            g2d.setFont(GameConstants.FONT_TEXT.deriveFont(12f));
+            FontMetrics fm = g2d.getFontMetrics();
+            
+            String title = mission.getTitle();
+            String type = mission.getType().getDisplayName();
+            String priority = mission.getPriority() == Mission.MissionPriority.HIGH || 
+                             mission.getPriority() == Mission.MissionPriority.CRITICAL ? " [!]" : "";
+            
+            int titleWidth = fm.stringWidth(title);
+            int typeWidth = fm.stringWidth(type + priority);
+            int width = Math.max(titleWidth, typeWidth) + 20;
+            int height = 44;
+            
+            // Fondo
+            g2d.setColor(new Color(0, 0, 0, 220));
+            g2d.fillRoundRect(x - width / 2, y - height, width, height, 8, 8);
+            
+            // Borde según prioridad
+            Color borderColor = mission.getPriority() == Mission.MissionPriority.HIGH || 
+                               mission.getPriority() == Mission.MissionPriority.CRITICAL ?
+                               new Color(255, 215, 0) : GameConstants.COLOR_CYAN_NEON;
+            g2d.setColor(borderColor);
+            g2d.setStroke(new BasicStroke(2));
+            g2d.drawRoundRect(x - width / 2, y - height, width, height, 8, 8);
+            
+            // Título
+            g2d.setFont(GameConstants.FONT_TEXT.deriveFont(Font.BOLD, 12f));
+            g2d.setColor(GameConstants.COLOR_TEXT_PRIMARY);
+            g2d.drawString(title, x - titleWidth / 2, y - 24);
+            
+            // Tipo + Prioridad
+            g2d.setFont(GameConstants.FONT_TEXT.deriveFont(10f));
+            g2d.setColor(GameConstants.COLOR_TEXT_SECONDARY);
+            g2d.drawString(type + priority, x - typeWidth / 2, y - 8);
         }
         
         /**

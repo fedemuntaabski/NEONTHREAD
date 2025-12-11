@@ -2,7 +2,7 @@ package com.neonthread;
 
 /**
  * Singleton que mantiene el estado de la sesión de juego actual (DRY).
- * Centraliza el acceso al personaje, distrito y misión activa.
+ * Centraliza el acceso al personaje, distrito, misión activa y estado del mundo.
  */
 public class GameSession {
     private static GameSession instance;
@@ -11,9 +11,11 @@ public class GameSession {
     private District district;
     private Mission currentMission;
     private GameLog gameLog;
+    private WorldState worldState;
     
     private GameSession() {
         this.gameLog = new GameLog();
+        this.worldState = WorldState.getInstance();
     }
     
     public static GameSession getInstance() {
@@ -31,6 +33,7 @@ public class GameSession {
         this.district = new District("Distrito Theta-5");
         this.currentMission = null;
         this.gameLog.clear();
+        this.worldState.reset();
         this.gameLog.add("Sesión iniciada: " + character.getName());
         initializeStartingMissions();
     }
@@ -46,6 +49,8 @@ public class GameSession {
             500,
             Mission.MissionType.MAIN
         );
+        firstMission.setPriority(Mission.MissionPriority.HIGH);
+        firstMission.setUrgency(Mission.MissionUrgency.NORMAL);
         district.addMission(firstMission);
     }
     
@@ -63,6 +68,7 @@ public class GameSession {
     public District getDistrict() { return district; }
     public Mission getCurrentMission() { return currentMission; }
     public GameLog getGameLog() { return gameLog; }
+    public WorldState getWorldState() { return worldState; }
     public void setCurrentMission(Mission mission) { this.currentMission = mission; }
     
     public boolean hasActiveSession() {

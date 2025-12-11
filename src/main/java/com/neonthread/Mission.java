@@ -1,10 +1,14 @@
 package com.neonthread;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Representa una misión del juego (KISS).
+ * Representa una misión del juego (KISS + DRY).
+ * Incluye: ciclo de vida avanzado, consecuencias narrativas, spawn conditions,
+ * prioridad, urgencia y sistema de outcomes múltiples.
  */
 public class Mission {
     private String id;
@@ -15,9 +19,23 @@ public class Mission {
     private MissionType type;
     private MissionStatus status;
     private int difficulty;
-    private List<String> requirements;
+    
+    // Sistema de requisitos y spawning
+    private List<String> requirements; // Misiones previas
+    private SpawnConditions spawnConditions;
+    
+    // Sistema de resultados y consecuencias
+    private Map<MissionOutcome, String> nextSceneByOutcome;
+    private Map<MissionOutcome, MissionReward> rewardsByOutcome;
+    private MissionConsequences consequences;
+    
+    // Sistema de visualización
+    private MissionPriority priority;
+    private MissionUrgency urgency;
+    
+    // Legado (mantener compatibilidad)
     private List<String> unlocks; // Locaciones/NPCs que desbloquea
-    private String nextSceneId; // Primera escena narrativa
+    private String nextSceneId; // Primera escena narrativa (default)
     private boolean completed;
     
     public Mission(String id, String title, String description, int rewardCredits, MissionType type) {
@@ -32,6 +50,14 @@ public class Mission {
         this.unlocks = new ArrayList<>();
         this.nextSceneId = null;
         this.completed = false;
+        
+        // Nuevos sistemas (valores por defecto)
+        this.spawnConditions = new SpawnConditions();
+        this.nextSceneByOutcome = new HashMap<>();
+        this.rewardsByOutcome = new HashMap<>();
+        this.consequences = new MissionConsequences();
+        this.priority = MissionPriority.NORMAL;
+        this.urgency = MissionUrgency.NORMAL;
     }
     
     // Getters
@@ -46,18 +72,146 @@ public class Mission {
     public List<String> getRequirements() { return requirements; }
     public List<String> getUnlocks() { return unlocks; }
     public String getNextSceneId() { return nextSceneId; }
+    public SpawnConditions getSpawnConditions() { return spawnConditions; }
+    public Map<MissionOutcome, String> getNextSceneByOutcome() { return nextSceneByOutcome; }
+    public Map<MissionOutcome, MissionReward> getRewardsByOutcome() { return rewardsByOutcome; }
+    public MissionConsequences getConsequences() { return consequences; }
+    public MissionPriority getPriority() { return priority; }
+    public MissionUrgency getUrgency() { return urgency; }
     
     // Setters
     public void setRewardInfo(String rewardInfo) { this.rewardInfo = rewardInfo; }
     public void setStatus(MissionStatus status) { this.status = status; }
     public void setDifficulty(int difficulty) { this.difficulty = difficulty; }
     public void setNextSceneId(String nextSceneId) { this.nextSceneId = nextSceneId; }
+    public void setPriority(MissionPriority priority) { this.priority = priority; }
+    public void setUrgency(MissionUrgency urgency) { this.urgency = urgency; }
     public void addRequirement(String requirement) { this.requirements.add(requirement); }
     public void addUnlock(String unlock) { this.unlocks.add(unlock); }
-    public void accept() { this.status = MissionStatus.ACCEPTED; }
-    public void complete() { 
+    public void addNextSceneForOutcome(MissionOutcome outcome, String sceneId) { 
+        this.nextSceneByOutcome.put(outcome, sceneId); 
+    }
+    public void addRewardForOutcome(MissionOutcome outcome, MissionReward reward) {
+        this.rewardsByOutcome.put(outcome, reward);
+    }
+    
+    /**
+     * Acepta la misión.
+     */
+    public void accept() { 
+        this.status = MissionStatus.ACCEPTED; 
+    }
+    
+    /**
+     * Completa la misión con un outcome específico.
+     */
+    public void complete(MissionOutcome outcome) { 
         this.completed = true;
-        this.status = MissionStatus.COMPLETED;
+        
+        switch (outcome) {
+            case SUCCESS:
+                this.status = MissionStatus.COMPLETED;
+                break;
+            case FAILURE:
+                this.status = MissionStatus.FAILED;
+                break;
+            case PARTIAL:
+                this.status = MissionStatus.COMPLETED;
+                break;
+            case ABORTED:
+                this.status = MissionStatus.ABORTED;
+                break;
+        }
+        
+        // Aplicar consecuencias
+        consequences.apply();
+    }
+    
+    /**
+     * Completa la misión (legacy - por defecto SUCCESS).
+     */
+    public void complete() { 
+        complete(MissionOutcome.SUCCESS);
+    }
+    
+    /**
+     * Falla la misión.
+     */
+    public void fail() {
+        complete(MissionOutcome.FAILURE);
+    }
+    
+    /**
+     * Aborta la misión.
+     */
+    public void abort() {
+        complete(MissionOutcome.ABORTED);
+    }
+    
+    /**
+     * Marca como expirada.
+     */
+    public void expire() {
+        this.status = MissionStatus.EXPIRED;
+    }
+    
+    /**
+     * Oculta la misión.
+     */
+    public void hide() {
+        this.status = MissionStatus.HIDDEN;
+    }
+    
+    /**
+     * Pone la misión en cooldown (para misiones repetibles).
+     */
+    public void setCooldown() {
+        this.status = MissionStatus.COOLDOWN;
+    }
+    
+    /**
+     * Obtiene la escena siguiente según el outcome.
+     * Si no hay específica, retorna nextSceneId por defecto.
+     */
+    public String getNextSceneForOutcome(MissionOutcome outcome) {
+        return nextSceneByOutcome.getOrDefault(outcome, nextSceneId);
+    }
+    
+    /**
+     * Obtiene la recompensa según el outcome.
+     * Si no hay específica, retorna recompensa por defecto.
+     */
+    public MissionReward getRewardForOutcome(MissionOutcome outcome) {
+        return rewardsByOutcome.getOrDefault(outcome, 
+            new MissionReward(rewardCredits, rewardInfo));
+    }
+    
+    /**
+     * Verifica si la misión puede aparecer según las condiciones.
+     */
+    public boolean canSpawn(WorldState worldState) {
+        return spawnConditions.isMet(worldState);
+    }
+    
+    /**
+     * Obtiene el símbolo visual según tipo y prioridad.
+     */
+    public String getVisualIcon() {
+        if (priority == MissionPriority.HIGH) {
+            switch (type) {
+                case MAIN: return "★";
+                case INTEL: return "◆";
+                case COMBAT: return "▲";
+                default: return "●";
+            }
+        } else {
+            switch (type) {
+                case MAIN: return "☆";
+                case INTEL: return "◇";
+                case COMBAT: return "△";
+                default: return "○";
+            }
+        }
     }
     
     /**
@@ -79,13 +233,18 @@ public class Mission {
     }
     
     /**
-     * Estados de misión (DRY).
+     * Estados de misión (ciclo de vida completo).
      */
     public enum MissionStatus {
+        HIDDEN("Oculta"),
         LOCKED("Bloqueada"),
         AVAILABLE("Disponible"),
         ACCEPTED("En Progreso"),
-        COMPLETED("Completada");
+        COMPLETED("Completada"),
+        FAILED("Fallida"),
+        ABORTED("Abortada"),
+        EXPIRED("Expirada"),
+        COOLDOWN("En Espera");
         
         private final String displayName;
         
@@ -94,5 +253,156 @@ public class Mission {
         }
         
         public String getDisplayName() { return displayName; }
+    }
+    
+    /**
+     * Resultados posibles de una misión.
+     */
+    public enum MissionOutcome {
+        SUCCESS,   // Completada con éxito total
+        FAILURE,   // Fallada
+        PARTIAL,   // Completada parcialmente
+        ABORTED    // Abandonada/abortada
+    }
+    
+    /**
+     * Prioridad visual de la misión.
+     */
+    public enum MissionPriority {
+        LOW,
+        NORMAL,
+        HIGH,
+        CRITICAL
+    }
+    
+    /**
+     * Urgencia de la misión (afecta expiración).
+     */
+    public enum MissionUrgency {
+        LOW,       // Sin límite de tiempo
+        NORMAL,    // Tiempo estándar
+        HIGH,      // Debe hacerse pronto
+        CRITICAL   // Puede expirar rápido
+    }
+    
+    /**
+     * Condiciones para que aparezca una misión (KISS).
+     */
+    public static class SpawnConditions {
+        private int minReputation = 0;
+        private int maxReputation = Integer.MAX_VALUE;
+        private List<String> requiredFlags = new ArrayList<>();
+        private List<String> forbiddenFlags = new ArrayList<>();
+        private String requiredDistrictState = null;
+        
+        public void setMinReputation(int min) { this.minReputation = min; }
+        public void setMaxReputation(int max) { this.maxReputation = max; }
+        public void addRequiredFlag(String flag) { this.requiredFlags.add(flag); }
+        public void addForbiddenFlag(String flag) { this.forbiddenFlags.add(flag); }
+        public void setRequiredDistrictState(String state) { this.requiredDistrictState = state; }
+        
+        public boolean isMet(WorldState worldState) {
+            if (worldState == null) return true;
+            
+            // Verificar reputación
+            int rep = worldState.getReputation();
+            if (rep < minReputation || rep > maxReputation) return false;
+            
+            // Verificar flags requeridos
+            for (String flag : requiredFlags) {
+                if (!worldState.hasFlag(flag)) return false;
+            }
+            
+            // Verificar flags prohibidos
+            for (String flag : forbiddenFlags) {
+                if (worldState.hasFlag(flag)) return false;
+            }
+            
+            // Verificar estado del distrito
+            if (requiredDistrictState != null && 
+                !requiredDistrictState.equals(worldState.getDistrictState())) {
+                return false;
+            }
+            
+            return true;
+        }
+    }
+    
+    /**
+     * Consecuencias narrativas de completar una misión (DRY).
+     */
+    public static class MissionConsequences {
+        private List<String> flagsToSet = new ArrayList<>();
+        private List<String> flagsToClear = new ArrayList<>();
+        private int reputationDelta = 0;
+        private String districtChangeId = null;
+        private List<String> narrativeItems = new ArrayList<>();
+        
+        public void addFlagToSet(String flag) { this.flagsToSet.add(flag); }
+        public void addFlagToClear(String flag) { this.flagsToClear.add(flag); }
+        public void setReputationDelta(int delta) { this.reputationDelta = delta; }
+        public void setDistrictChange(String changeId) { this.districtChangeId = changeId; }
+        public void addNarrativeItem(String item) { this.narrativeItems.add(item); }
+        
+        public List<String> getFlagsToSet() { return flagsToSet; }
+        public List<String> getFlagsToClear() { return flagsToClear; }
+        public int getReputationDelta() { return reputationDelta; }
+        public String getDistrictChangeId() { return districtChangeId; }
+        public List<String> getNarrativeItems() { return narrativeItems; }
+        
+        /**
+         * Aplica las consecuencias al WorldState.
+         */
+        public void apply() {
+            WorldState worldState = WorldState.getInstance();
+            
+            // Aplicar flags
+            for (String flag : flagsToSet) {
+                worldState.setFlag(flag, true);
+            }
+            for (String flag : flagsToClear) {
+                worldState.setFlag(flag, false);
+            }
+            
+            // Aplicar reputación
+            if (reputationDelta != 0) {
+                worldState.modifyReputation(reputationDelta);
+            }
+            
+            // Aplicar items narrativos
+            for (String item : narrativeItems) {
+                worldState.addNarrativeItem(item);
+            }
+            
+            // Estado del distrito (implementación futura)
+            if (districtChangeId != null) {
+                worldState.setDistrictState(districtChangeId);
+            }
+        }
+    }
+    
+    /**
+     * Recompensa de una misión (puede variar según outcome).
+     */
+    public static class MissionReward {
+        private int credits;
+        private String info;
+        private List<String> narrativeItems = new ArrayList<>();
+        private int reputationBonus = 0;
+        
+        public MissionReward(int credits, String info) {
+            this.credits = credits;
+            this.info = info;
+        }
+        
+        public int getCredits() { return credits; }
+        public String getInfo() { return info; }
+        public List<String> getNarrativeItems() { return narrativeItems; }
+        public int getReputationBonus() { return reputationBonus; }
+        
+        public void setCredits(int credits) { this.credits = credits; }
+        public void setInfo(String info) { this.info = info; }
+        public void addNarrativeItem(String item) { this.narrativeItems.add(item); }
+        public void setReputationBonus(int bonus) { this.reputationBonus = bonus; }
     }
 }

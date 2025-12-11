@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * Historial de estadísticas de una misión (DRY).
- * Registra decisiones, checks, tiempo, rutas secretas.
+ * Registra decisiones, checks, tiempo, rutas secretas y outcome final.
  */
 public class MissionHistory {
     private String missionId;
@@ -21,6 +21,7 @@ public class MissionHistory {
     private List<String> secretRoutesDiscovered;
     private List<String> itemsCollected;
     private Map<String, Boolean> flagsActivated;
+    private Mission.MissionOutcome outcome;
     
     public MissionHistory(String missionId) {
         this.missionId = missionId;
@@ -31,6 +32,7 @@ public class MissionHistory {
         this.secretRoutesDiscovered = new ArrayList<>();
         this.itemsCollected = new ArrayList<>();
         this.flagsActivated = new HashMap<>();
+        this.outcome = null; // Se establece al finalizar
     }
     
     // Getters
@@ -43,12 +45,21 @@ public class MissionHistory {
     public List<String> getSecretRoutesDiscovered() { return secretRoutesDiscovered; }
     public List<String> getItemsCollected() { return itemsCollected; }
     public Map<String, Boolean> getFlagsActivated() { return flagsActivated; }
+    public Mission.MissionOutcome getOutcome() { return outcome; }
     
     /**
-     * Finaliza el historial marcando el tiempo final.
+     * Finaliza el historial marcando el tiempo final y el outcome.
+     */
+    public void finish(Mission.MissionOutcome outcome) {
+        this.endTime = Instant.now();
+        this.outcome = outcome;
+    }
+    
+    /**
+     * Finaliza el historial (legacy - por defecto SUCCESS).
      */
     public void finish() {
-        this.endTime = Instant.now();
+        finish(Mission.MissionOutcome.SUCCESS);
     }
     
     /**
@@ -111,5 +122,25 @@ public class MissionHistory {
      */
     public void setFlagActivated(String flagKey, boolean value) {
         flagsActivated.put(flagKey, value);
+    }
+    
+    /**
+     * Obtiene un resumen del resultado de la misión.
+     */
+    public String getOutcomeSummary() {
+        if (outcome == null) return "En progreso";
+        
+        switch (outcome) {
+            case SUCCESS:
+                return "Éxito total";
+            case PARTIAL:
+                return "Éxito parcial";
+            case FAILURE:
+                return "Fallida";
+            case ABORTED:
+                return "Abortada";
+            default:
+                return "Desconocido";
+        }
     }
 }

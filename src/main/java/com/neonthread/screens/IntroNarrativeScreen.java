@@ -52,10 +52,10 @@ public class IntroNarrativeScreen extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 20));
         buttonPanel.setBackground(GameConstants.COLOR_BACKGROUND);
         
-        CyberpunkButton skipButton = new CyberpunkButton("OMITIR");
+        CyberpunkButton skipButton = new CyberpunkButton("SKIP");
         skipButton.addActionListener(e -> skipIntro());
         
-        continueButton = new CyberpunkButton("CONTINUAR");
+        continueButton = new CyberpunkButton("CONTINUE");
         continueButton.addActionListener(e -> continueToDistrict());
         continueButton.setEnabled(false);
         
@@ -77,7 +77,7 @@ public class IntroNarrativeScreen extends JPanel {
             BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
         
-        JLabel titleLabel = new JLabel("SISTEMA DE INFILTRACIÓN URBANA - v1.9");
+        JLabel titleLabel = new JLabel("URBAN INFILTRATION SYSTEM - v1.9");
         titleLabel.setFont(new Font(GameConstants.FONT_FAMILY, Font.BOLD, 14));
         titleLabel.setForeground(GameConstants.COLOR_CYAN_NEON);
         panel.add(titleLabel);
@@ -95,34 +95,34 @@ public class IntroNarrativeScreen extends JPanel {
      */
     private String buildNarrativeText() {
         GameSession session = GameSession.getInstance();
-        String name = "Operador";
-        String roleDesc = "operador de la ciudad";
+        String name = "Operator";
+        String roleDesc = "city operator";
         
         if (session.hasActiveSession()) {
             name = session.getCharacter().getName();
             roleDesc = session.getCharacter().getRole().getDescription().toLowerCase();
         }
         
-        return "> Inicializando protocolos de acceso...\n" +
-               "> Autenticando operador: " + name.toUpperCase() + "\n" +
-               "> Sincronizando implantes neuronales...\n" +
-               "> Cargando entorno: Distrito Theta-5...\n\n" +
+        return "> Initializing access protocols...\n" +
+               "> Authenticating operator: " + name.toUpperCase() + "\n" +
+               "> Synchronizing neural implants...\n" +
+               "> Loading environment: District Theta-5...\n\n" +
                "─".repeat(60) + "\n\n" +
-               "La megaciudad de NEONFALL nunca duerme.\n\n" +
-               "Sus rascacielos ocultan una red de datos encriptados, viejas guerras corporativas\n" +
-               "y callejones donde la vida vale menos que un byte.\n\n" +
-               "El año es 2087. La ciudad ya no tiene nombre.\n" +
-               "Solo códigos corporativos y sectores numerados.\n\n" +
-               "Una megacorporación controla todo: el agua, la electricidad, la información.\n\n" +
-               "Tú eres " + name + ", " + roleDesc + ".\n\n" +
-               "Vivís en las sombras del Distrito Theta-5, donde la ley corporativa no llega.\n\n" +
-               "Esta es tu primera 'run'. Tu primera oportunidad de cambiar las reglas.\n" +
-               "O de desaparecer intentándolo.\n\n" +
+               "The megacity of NEONFALL never sleeps.\n\n" +
+               "Its skyscrapers hide encrypted data networks, old corporate wars\n" +
+               "and alleys where life is worth less than a byte.\n\n" +
+               "The year is 2087. The city no longer has a name.\n" +
+               "Only corporate codes and numbered sectors.\n\n" +
+               "One megacorporation controls everything: water, electricity, information.\n\n" +
+               "You are " + name + ", " + roleDesc + ".\n\n" +
+               "You live in the shadows of District Theta-5, where corporate law doesn't reach.\n\n" +
+               "This is your first 'run'. Your first chance to change the rules.\n" +
+               "Or to disappear trying.\n\n" +
                "─".repeat(60) + "\n\n" +
-               "> MISIÓN 01 DESBLOQUEADA: El Primer Contacto\n" +
-               "> Localización disponible: Distrito Theta-5\n" +
-               "> Estado del sistema: OPERATIVO\n\n" +
-               "Protocolo de iniciación completo. Bienvenido a la red.";
+               "> MISSION 01 UNLOCKED: First Contact\n" +
+               "> Available location: District Theta-5\n" +
+               "> System status: OPERATIONAL\n\n" +
+               "Initiation protocol complete. Welcome to the network.";
     }
     
     /**
