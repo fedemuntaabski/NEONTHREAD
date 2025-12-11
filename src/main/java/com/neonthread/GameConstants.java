@@ -11,15 +11,17 @@ public final class GameConstants {
     // Prevenir instanciación
     private GameConstants() {}
     
-    // Colores Cyberpunk mejorados
-    public static final Color COLOR_BACKGROUND = new Color(0x02030A); // Negro azulado profundo
+    // Colores Cyberpunk mejorados (siguiendo especificaciones)
+    public static final Color COLOR_BACKGROUND = new Color(0x0B0C10); // Negro urbano casi total
     public static final Color COLOR_PANEL = new Color(0x0A0F1B); // Paneles y bordes
-    public static final Color COLOR_CYAN_NEON = new Color(0x05D9E8); // Líneas y divisores brillantes
-    public static final Color COLOR_TEXT_PRIMARY = new Color(0xE3F8FF); // Texto principal
+    public static final Color COLOR_CYAN_NEON = new Color(0x00FFE7); // Acento primario cian neón
+    public static final Color COLOR_PURPLE_NEON = new Color(0x9A4DFF); // Acento secundario púrpura neón
+    public static final Color COLOR_TEXT_PRIMARY = new Color(0xE0E0E0); // Texto principal
     public static final Color COLOR_TEXT_SECONDARY = new Color(0x7BAAB5); // Texto secundario
     public static final Color COLOR_BUTTON_HOVER = new Color(0x05D9E8); // Botones hover
     public static final Color COLOR_BUTTON_ACTIVE = new Color(0xFF1976); // Rosa neón warning
     public static final Color COLOR_MAGENTA_NEON = new Color(0xFF00E6); // Legacy magenta
+    public static final Color COLOR_RED_NEON = new Color(0xFF073A); // Rojo neón agresivo
     public static final Color COLOR_YELLOW_NEON = new Color(0xFFE600); // Legacy yellow
     public static final Color COLOR_BLUE_ELECTRIC = new Color(0x00A4FF); // Legacy blue
     public static final Color COLOR_GRAY_SYSTEM = new Color(0x303030); // Legacy gray

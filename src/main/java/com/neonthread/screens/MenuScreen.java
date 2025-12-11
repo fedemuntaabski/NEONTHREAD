@@ -33,6 +33,7 @@ public class MenuScreen extends JPanel {
     private Timer scanlineTimer;
     private Timer dataStreamTimer;
     private Runnable onSettingsRequested;
+    private Runnable onStartRunRequested;
     
     public MenuScreen() {
         setLayout(new GridBagLayout());
@@ -176,6 +177,10 @@ public class MenuScreen extends JPanel {
         this.onSettingsRequested = onSettingsRequested;
     }
     
+    public void setOnStartRunRequested(Runnable onStartRunRequested) {
+        this.onStartRunRequested = onStartRunRequested;
+    }
+    
     public void cleanup() {
         cursor.stop();
         if (scanlineTimer != null) {
@@ -229,10 +234,11 @@ public class MenuScreen extends JPanel {
     private void executeOption() {
         switch (selectedIndex) {
             case 0:
-                JOptionPane.showMessageDialog(this, 
-                    "Starting new run...\n(Game logic not implemented yet)", 
-                    "Start Run", 
-                    JOptionPane.INFORMATION_MESSAGE);
+                // Iniciar nueva partida con transición
+                if (onStartRunRequested != null) {
+                    cleanup();
+                    onStartRunRequested.run();
+                }
                 break;
             case 1:
                 JOptionPane.showMessageDialog(this, 

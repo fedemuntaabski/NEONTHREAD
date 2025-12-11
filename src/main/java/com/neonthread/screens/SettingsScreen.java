@@ -75,22 +75,25 @@ public class SettingsScreen extends JPanel {
         bottomPanel.setBackground(GameConstants.COLOR_BACKGROUND);
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 40, 0));
         
-        CyberpunkButton saveButton = new CyberpunkButton("GUARDAR");
-        saveButton.setBackground(Color.WHITE);
-        saveButton.setForeground(Color.BLACK);
-        saveButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        saveButton.addActionListener(e -> saveAndApply());
-        
-        CyberpunkButton backButton = new CyberpunkButton("VOLVER");
-        backButton.setBackground(Color.WHITE);
-        backButton.setForeground(Color.BLACK);
-        backButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        backButton.addActionListener(e -> onBack.accept(null));
+        CyberpunkButton saveButton = createStyledButton("GUARDAR", e -> saveAndApply());
+        CyberpunkButton backButton = createStyledButton("VOLVER", e -> onBack.accept(null));
         
         bottomPanel.add(saveButton);
         bottomPanel.add(backButton);
         
         add(bottomPanel, BorderLayout.SOUTH);
+    }
+    
+    /**
+     * Crea un botón estilizado (DRY).
+     */
+    private CyberpunkButton createStyledButton(String text, java.awt.event.ActionListener action) {
+        CyberpunkButton button = new CyberpunkButton(text);
+        button.setBackground(Color.WHITE);
+        button.setForeground(Color.BLACK);
+        button.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        button.addActionListener(action);
+        return button;
     }
     
     private JComponent createResolutionControl() {
@@ -133,14 +136,8 @@ public class SettingsScreen extends JPanel {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(GameConstants.COLOR_BACKGROUND);
         
-        normalTextRadio = new JRadioButton("Normal");
-        largeTextRadio = new JRadioButton("Grande");
-        
-        normalTextRadio.setSelected(!settings.isLargeText());
-        largeTextRadio.setSelected(settings.isLargeText());
-        
-        styleRadioButton(normalTextRadio);
-        styleRadioButton(largeTextRadio);
+        normalTextRadio = createStyledRadioButton("Normal", !settings.isLargeText());
+        largeTextRadio = createStyledRadioButton("Grande", settings.isLargeText());
         
         ButtonGroup group = new ButtonGroup();
         group.add(normalTextRadio);
@@ -153,11 +150,17 @@ public class SettingsScreen extends JPanel {
         return panel;
     }
     
-    private void styleRadioButton(JRadioButton radio) {
+    /**
+     * Crea un radio button estilizado (DRY).
+     */
+    private JRadioButton createStyledRadioButton(String text, boolean selected) {
+        JRadioButton radio = new JRadioButton(text);
+        radio.setSelected(selected);
         radio.setBackground(GameConstants.COLOR_BACKGROUND);
         radio.setForeground(GameConstants.COLOR_TEXT_PRIMARY);
         radio.setFont(GameConstants.FONT_TEXT);
         radio.setFocusPainted(false);
+        return radio;
     }
     
     private void addSettingRow(JPanel parent, String label, JComponent control) {

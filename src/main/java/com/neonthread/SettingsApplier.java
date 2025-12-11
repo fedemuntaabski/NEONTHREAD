@@ -93,14 +93,26 @@ public class SettingsApplier {
      */
     private void applyTextSize() {
         int baseSize = settings.isLargeText() ? 18 : 14;
-        
+        updateUIFonts(baseSize);
+    }
+    
+    /**
+     * Actualiza todas las fuentes de la UI (DRY).
+     */
+    private void updateUIFonts(int baseSize) {
         Font textFont = new Font(GameConstants.FONT_FAMILY, Font.PLAIN, baseSize);
         Font buttonFont = new Font(GameConstants.FONT_FAMILY, Font.BOLD, baseSize + 4);
         
-        UIManager.put("Label.font", textFont);
+        String[] fontKeys = {
+            "Label.font", "RadioButton.font", "CheckBox.font",
+            "TextField.font", "TextArea.font", "ComboBox.font"
+        };
+        
+        for (String key : fontKeys) {
+            UIManager.put(key, textFont);
+        }
+        
         UIManager.put("Button.font", buttonFont);
-        UIManager.put("RadioButton.font", textFont);
-        UIManager.put("CheckBox.font", textFont);
         
         SwingUtilities.updateComponentTreeUI(window);
         window.revalidate();
