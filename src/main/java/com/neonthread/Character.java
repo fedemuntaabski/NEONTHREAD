@@ -1,101 +1,184 @@
 package com.neonthread;
 
+import com.neonthread.stats.BaseAttributes;
+import com.neonthread.stats.DerivedCapabilities;
+import com.neonthread.stats.Modifier;
+import com.neonthread.stats.RuntimeStats;
+import com.neonthread.stats.StatType;
+import com.neonthread.inventory.Inventory;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * Representa el personaje del jugador (DRY).
  * Almacena toda la información relevante de la run.
+ * Refactored to use layered stats architecture.
  */
 public class Character {
     private String name;
     private Role role;
     private Difficulty difficulty;
     
-    // Atributos base
-    private int intelligence;
-    private int physical;
-    private int perception;
-    private int charisma;
+    // Layer 1: Base Attributes (What you ARE)
+    private BaseAttributes baseAttributes;
     
-    // Stats del personaje
+    // Layer 2: Derived Capabilities (What you CAN DO) - Calculated on fly
+    // private DerivedCapabilities derivedCapabilities; // Not stored, calculated.
+    
+    // Layer 3: Runtime Stats (Volatile)
+    private RuntimeStats runtimeStats;
+    
+    // Layer 4: Modifiers
+    private List<Modifier> modifiers;
+    
+    // Layer 5: Inventory
+    private Inventory inventory;
+    
+    // Persistent Stats (Meta/Long-term)
     private int level;
     private int credits;
-    private int health;
-    private int energy;
     private int karma;
     private int notoriety;
-    private int battery; // Energía para acciones especiales
-    private int reputation; // Reputación en la ciudad
+    private int reputation;
     
     public Character(String name, Role role, Difficulty difficulty) {
         this.name = name;
         this.role = role;
         this.difficulty = difficulty;
         
-        // Atributos base según rol
+        // Initialize lists
+        this.modifiers = new ArrayList<>();
+        this.inventory = new Inventory(this);
+        
+        // Initialize Attributes based on Role
         initializeAttributesByRole(role);
         
-        // Valores iniciales
+        // Initialize Runtime Stats
+        this.runtimeStats = new RuntimeStats(100, 100, 100); // Default max values
+        
+        // Initialize Persistent Stats
         this.level = 1;
         this.credits = 1000;
-        this.health = 100;
-        this.energy = 100;
         this.karma = 0;
         this.notoriety = 0;
-        this.battery = 100;
         this.reputation = 0;
     }
     
-    /**
-     * Inicializa atributos según el rol (DRY).
-     */
     private void initializeAttributesByRole(Role role) {
+        int intel = 0, phys = 0, per = 0, cha = 0;
         switch (role) {
             case HACKER:
-                this.intelligence = 5;
-                this.physical = 1;
-                this.perception = 3;
-                this.charisma = 2;
+                intel = 5; phys = 1; per = 3; cha = 2;
                 break;
             case MERC:
-                this.intelligence = 2;
-                this.physical = 5;
-                this.perception = 3;
-                this.charisma = 1;
+                intel = 2; phys = 5; per = 3; cha = 1;
                 break;
             case INFO_BROKER:
-                this.intelligence = 3;
-                this.physical = 1;
-                this.perception = 4;
-                this.charisma = 4;
+                intel = 3; phys = 1; per = 4; cha = 4;
                 break;
         }
+        this.baseAttributes = new BaseAttributes(intel, phys, per, cha);
     }
     
-    // Getters y setters
+    // --- Core Stat Logic ---
+
+    public int getEffectiveAttribute(StatType type) {
+        int base = 0;
+        switch (type) {
+            case INTELLIGENCE: base = baseAttributes.getIntelligence(); break;
+            case PHYSICAL: base = baseAttributes.getPhysical(); break;
+            case PERCEPTION: base = baseAttributes.getPerception(); break;
+            case CHARISMA: base = baseAttributes.getCharisma(); break;
+            default: return 0; // Should not happen for attributes
+        }
+        return base + getModifierTotal(type);
+    }
+
+    public int getEffectiveCapability(StatType type) {
+        int intel = getEffectiveAttribute(StatType.INTELLIGENCE);
+        int phys = getEffectiveAttribute(StatType.PHYSICAL);
+        int per = getEffectiveAttribute(StatType.PERCEPTION);
+        int cha = getEffectiveAttribute(StatType.CHARISMA);
+        
+        int base = 0;
+        switch (type) {
+            case HACK: base = intel + (per / 2); break;
+            case COMBAT: base = phys + (per / 2); break;
+            case STEALTH: base = per + (phys / 2); break;
+            case NEGOTIATION: base = cha + (intel / 2); break;
+            case ANALYSIS: base = intel + (per / 2); break;
+            default: return 0;
+        }
+        return base + getModifierTotal(type);
+    }
+
+    private int getModifierTotal(StatType type) {
+        return modifiers.stream()
+                .filter(m -> m.getTargetStat() == type)
+                .mapToInt(Modifier::getValue)
+                .sum();
+    }
+
+    public void addModifier(Modifier modifier) {
+        modifiers.add(modifier);
+    }
+
+    public void removeModifier(Modifier modifier) {
+        modifiers.remove(modifier);
+    }
+
+    public void tickModifiers() {
+        Iterator<Modifier> it = modifiers.iterator();
+        while (it.hasNext()) {
+            Modifier m = it.next();
+            m.decreaseDuration();
+            if (m.isExpired()) {
+                it.remove();
+            }
+        }
+    }
+
+    // --- Getters for Legacy/Direct Access ---
+    
     public String getName() { return name; }
     public Role getRole() { return role; }
     public Difficulty getDifficulty() { return difficulty; }
-    public int getIntelligence() { return intelligence; }
-    public int getPhysical() { return physical; }
-    public int getPerception() { return perception; }
-    public int getCharisma() { return charisma; }
+    
+    // Attributes (Raw)
+    public BaseAttributes getBaseAttributes() { return baseAttributes; }
+    
+    public Inventory getInventory() { return inventory; }
+    
+    // Runtime Stats
+    public RuntimeStats getRuntimeStats() { return runtimeStats; }
+    public int getHealth() { return runtimeStats.getHealth(); }
+    public void setHealth(int val) { runtimeStats.setHealth(val); }
+    public int getEnergy() { return runtimeStats.getEnergy(); }
+    public void setEnergy(int val) { runtimeStats.setEnergy(val); }
+    public int getBattery() { return runtimeStats.getBattery(); }
+    public void setBattery(int val) { runtimeStats.setBattery(val); }
+    
+    // Persistent Stats
     public int getLevel() { return level; }
-    public int getCredits() { return credits; }
-    public int getHealth() { return health; }
-    public int getEnergy() { return energy; }
-    public int getKarma() { return karma; }
-    public int getNotoriety() { return notoriety; }
-    public int getBattery() { return battery; }
-    public int getReputation() { return reputation; }
-    
     public void setLevel(int level) { this.level = level; }
+    public int getCredits() { return credits; }
     public void setCredits(int credits) { this.credits = credits; }
-    public void setHealth(int health) { this.health = Math.max(0, Math.min(100, health)); }
-    public void setEnergy(int energy) { this.energy = Math.max(0, Math.min(100, energy)); }
+    public void removeCredits(int amount) { this.credits -= amount; }
+    public int getKarma() { return karma; }
     public void setKarma(int karma) { this.karma = karma; }
-    public void setNotoriety(int notoriety) { this.notoriety = Math.max(0, notoriety); }
-    public void setBattery(int battery) { this.battery = Math.max(0, Math.min(100, battery)); }
+    public int getNotoriety() { return notoriety; }
+    public void setNotoriety(int notoriety) { this.notoriety = notoriety; }
+    public int getReputation() { return reputation; }
     public void setReputation(int reputation) { this.reputation = reputation; }
-    
+
+    // Helper for legacy attribute access (returns effective value now)
+    public int getIntelligence() { return getEffectiveAttribute(StatType.INTELLIGENCE); }
+    public int getPhysical() { return getEffectiveAttribute(StatType.PHYSICAL); }
+    public int getPerception() { return getEffectiveAttribute(StatType.PERCEPTION); }
+    public int getCharisma() { return getEffectiveAttribute(StatType.CHARISMA); }
+
     /**
      * Obtiene el multiplicador de daño enemigo según dificultad (DRY).
      */

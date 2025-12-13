@@ -50,6 +50,9 @@ public class PauseScreen extends JPanel {
         addButton(centerPanel, "CONTINUE", () -> onStateChange.accept(previousState));
         centerPanel.add(Box.createVerticalStrut(15));
         
+        addButton(centerPanel, "INVENTORY", () -> onStateChange.accept(GameState.STATE_INVENTORY));
+        centerPanel.add(Box.createVerticalStrut(15));
+        
         addButton(centerPanel, "SETTINGS", onSettings);
         centerPanel.add(Box.createVerticalStrut(15));
         

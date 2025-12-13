@@ -9,7 +9,6 @@ public enum GameState {
     STATE_BOOTSTRAP,
     STATE_BOOT,
     STATE_LOGO_GLITCH,
-    STATE_TITLE,
     STATE_MENU,
     STATE_SETTINGS,
     
@@ -21,5 +20,6 @@ public enum GameState {
     STATE_MISSION_WINDOW,
     STATE_NARRATIVE_SCENE,
     STATE_RESULT_SCREEN,
-    STATE_PAUSE
+    STATE_PAUSE,
+    STATE_INVENTORY
 }

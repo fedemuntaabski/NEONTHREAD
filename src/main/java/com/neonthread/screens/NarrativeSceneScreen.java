@@ -2,6 +2,7 @@ package com.neonthread.screens;
 
 import com.neonthread.*;
 import com.neonthread.NarrativeScene.*;
+import com.neonthread.stats.StatType;
 import com.neonthread.ui.CyberpunkButton;
 
 import javax.swing.*;
@@ -341,9 +342,11 @@ public class NarrativeSceneScreen extends JPanel {
      * Carga una nueva escena por ID (DRY).
      */
     private void loadScene(String sceneId) {
-        // En producción, cargar desde archivo o DB
-        // Por ahora, crear escenas de ejemplo
-        NarrativeScene nextScene = createExampleScene(sceneId);
+        NarrativeScene nextScene = com.neonthread.loaders.SceneLoader.getScene(sceneId);
+        if (nextScene == null) {
+            // Fallback a ejemplo si no existe en JSON
+            nextScene = createExampleScene(sceneId);
+        }
         startScene(nextScene);
     }
     
@@ -363,13 +366,13 @@ public class NarrativeSceneScreen extends JPanel {
         
         // Opción 1: Check de inteligencia
         SceneOption option1 = new SceneOption("Descifrar el mensaje", "scene_success");
-        option1.addCheck(new AttributeCheck(AttributeCheck.CheckType.INTELLIGENCE, 4, "Inteligencia ≥ 4"));
+        option1.addCheck(new AttributeCheck(StatType.INTELLIGENCE, 4, "Inteligencia ≥ 4"));
         option1.addConsecuencia(new Consequence(Consequence.ConsequenceType.ADD_LOG, "Mensaje descifrado con éxito", 0));
         option1.addConsecuencia(new Consequence(Consequence.ConsequenceType.CHANGE_REPUTATION, "", 1));
         
         // Opción 2: Check de percepción
         SceneOption option2 = new SceneOption("Buscar trampas en el área", "scene_trap_found");
-        option2.addCheck(new AttributeCheck(AttributeCheck.CheckType.PERCEPTION, 3, "Percepción ≥ 3"));
+        option2.addCheck(new AttributeCheck(StatType.PERCEPTION, 3, "Percepción ≥ 3"));
         option2.setEscenaFallo("scene_trap_triggered");
         
         // Opción 3: Sin checks
@@ -413,22 +416,22 @@ public class NarrativeSceneScreen extends JPanel {
     }
     
     /**
-     * Muestra el inventario (placeholder).
+     * Muestra el inventario en un diálogo modal.
      */
     private void showInventario() {
-        com.neonthread.Character character = session.getCharacter();
-        String info = String.format(
-            "INVENTARIO\n\n" +
-            "Créditos: %d\n" +
-            "Batería: %d%%\n" +
-            "Reputación: %d\n\n" +
-            "(Sistema de items en desarrollo)",
-            character.getCredits(),
-            character.getBattery(),
-            character.getReputation()
-        );
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Inventory", true);
+        dialog.setSize(800, 600);
+        dialog.setLocationRelativeTo(this);
+        dialog.setUndecorated(true);
         
-        JOptionPane.showMessageDialog(this, info, "Inventario", JOptionPane.INFORMATION_MESSAGE);
+        InventoryScreen inventoryScreen = new InventoryScreen(state -> {});
+        inventoryScreen.refresh();
+        inventoryScreen.setBackAction(() -> dialog.dispose());
+        
+        inventoryScreen.setBorder(BorderFactory.createLineBorder(GameConstants.COLOR_CYAN_NEON, 2));
+        
+        dialog.add(inventoryScreen);
+        dialog.setVisible(true);
     }
     
     /**
@@ -459,7 +462,7 @@ public class NarrativeSceneScreen extends JPanel {
         
         Mission mission = session.getCurrentMission();
         if (mission != null) {
-            mission.complete();
+            mission.complete(session.getCharacter());
         }
         
         onStateChange.accept(GameState.STATE_RESULT_SCREEN);

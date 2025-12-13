@@ -1,8 +1,9 @@
 package com.neonthread.screens;
 
 import com.neonthread.GameConstants;
-import com.neonthread.GameSettings;
+import com.neonthread.settings.GameSettings;
 import com.neonthread.SettingsApplier;
+import com.neonthread.localization.Localization;
 import com.neonthread.ui.CyberpunkButton;
 import com.neonthread.ui.CyberpunkComboBox;
 import com.neonthread.ui.CyberpunkSlider;
@@ -11,25 +12,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
 
-/**
- * Pantalla de configuración simple y minimalista (KISS).
- * Solo opciones esenciales: resolución, pantalla completa, volumen y tamaño de texto.
- */
 public class SettingsScreen extends JPanel {
-    private final Consumer<Void> onBack;
+    private Consumer<Void> onBack;
     private final GameSettings settings;
-    private final SettingsApplier applier;
-    
-    private CyberpunkComboBox<String> resolutionCombo;
-    private JCheckBox fullscreenCheck;
-    private CyberpunkSlider volumeSlider;
-    private JRadioButton normalTextRadio;
-    private JRadioButton largeTextRadio;
     
     public SettingsScreen(Consumer<Void> onBack, JFrame window) {
         this.onBack = onBack;
         this.settings = GameSettings.getInstance();
-        this.applier = new SettingsApplier(window);
+        // Ensure applier is initialized (it registers itself as listener)
+        new SettingsApplier(window);
         
         setLayout(new BorderLayout());
         setBackground(GameConstants.COLOR_BACKGROUND);
@@ -37,179 +28,172 @@ public class SettingsScreen extends JPanel {
         buildUI();
     }
     
+    public void setBackAction(Consumer<Void> onBack) {
+        this.onBack = onBack;
+        // Rebuild UI to update back button listener if necessary, 
+        // but since we use the field in the listener, it should be fine if we just update the field.
+        // However, the back button listener is added in buildUI -> addFooter.
+        // We need to update the listener on the existing button or rebuild.
+        // Rebuilding is safer.
+        buildUI();
+        revalidate();
+        repaint();
+    }
+
     private void buildUI() {
-        // Título
-        JLabel titleLabel = new JLabel("SETTINGS", SwingConstants.CENTER);
+        removeAll(); // Clear for rebuild on language change
+
+        // Title
+        JLabel titleLabel = new JLabel(Localization.get("menu.settings"), SwingConstants.CENTER);
         titleLabel.setFont(new Font(GameConstants.FONT_FAMILY, Font.BOLD, 40));
         titleLabel.setForeground(GameConstants.COLOR_TEXT_PRIMARY);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(30, 0, 40, 0));
         add(titleLabel, BorderLayout.NORTH);
         
-        // Panel central con todas las opciones
+        // Center Panel
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setBackground(GameConstants.COLOR_BACKGROUND);
         centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 100, 20, 100));
         
-        // Resolución
-        addSeparator(centerPanel);
-        addSettingRow(centerPanel, "Resolución", createResolutionControl());
-        addSeparator(centerPanel);
+        // Resolution
+        addSettingRow(centerPanel, Localization.get("settings.resolution"), createResolutionControl());
         
-        // Pantalla completa
-        addSettingRow(centerPanel, "Pantalla completa", createFullscreenControl());
-        addSeparator(centerPanel);
+        // Fullscreen
+        addSettingRow(centerPanel, Localization.get("settings.fullscreen"), createFullscreenControl());
         
-        // Volumen maestro
-        addSettingRow(centerPanel, "Volumen maestro", createVolumeControl());
-        addSeparator(centerPanel);
+        // Volume
+        addSettingRow(centerPanel, Localization.get("settings.volume"), createVolumeControl());
         
-        // Tamaño de texto
-        addSettingRow(centerPanel, "Tamaño de texto", createTextSizeControl());
-        addSeparator(centerPanel);
+        // Text Size
+        addSettingRow(centerPanel, Localization.get("settings.largeText"), createTextSizeControl());
+
+        // Language
+        addSettingRow(centerPanel, Localization.get("settings.language"), createLanguageControl());
+
+        // Theme
+        addSettingRow(centerPanel, Localization.get("settings.theme"), createThemeControl());
         
         add(centerPanel, BorderLayout.CENTER);
         
-        // Botones inferiores
+        // Bottom Buttons
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 20));
         bottomPanel.setBackground(GameConstants.COLOR_BACKGROUND);
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 40, 0));
         
-        CyberpunkButton saveButton = createStyledButton("GUARDAR", e -> saveAndApply());
-        CyberpunkButton backButton = createStyledButton("VOLVER", e -> onBack.accept(null));
+        CyberpunkButton saveButton = createStyledButton(Localization.get("settings.apply"), e -> settings.save());
+        CyberpunkButton backButton = createStyledButton(Localization.get("settings.back"), e -> onBack.accept(null));
         
         bottomPanel.add(saveButton);
         bottomPanel.add(backButton);
         
         add(bottomPanel, BorderLayout.SOUTH);
+        
+        revalidate();
+        repaint();
     }
     
-    /**
-     * Crea un botón estilizado (DRY).
-     */
+    private void addSettingRow(JPanel panel, String labelText, JComponent control) {
+        JPanel row = new JPanel(new BorderLayout());
+        row.setBackground(GameConstants.COLOR_BACKGROUND);
+        row.setMaximumSize(new Dimension(600, 50));
+        
+        JLabel label = new JLabel(labelText);
+        label.setFont(new Font(GameConstants.FONT_FAMILY, Font.PLAIN, 18));
+        label.setForeground(GameConstants.COLOR_TEXT_PRIMARY);
+        
+        row.add(label, BorderLayout.WEST);
+        row.add(control, BorderLayout.EAST);
+        
+        panel.add(row);
+        panel.add(Box.createRigidArea(new Dimension(0, 15)));
+    }
+
     private CyberpunkButton createStyledButton(String text, java.awt.event.ActionListener action) {
         CyberpunkButton button = new CyberpunkButton(text);
-        button.setBackground(Color.WHITE);
-        button.setForeground(Color.BLACK);
-        button.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         button.addActionListener(action);
         return button;
     }
     
     private JComponent createResolutionControl() {
         String[] resolutions = {"1280x720", "1600x900", "1920x1080"};
-        resolutionCombo = new CyberpunkComboBox<>(resolutions);
-        resolutionCombo.setSelectedItem(settings.getResolution());
-        resolutionCombo.setPreferredSize(new Dimension(200, 35));
+        CyberpunkComboBox<String> combo = new CyberpunkComboBox<>(resolutions);
+        combo.setSelectedItem(settings.video.getResolution());
         
-        // Deshabilitar si está en pantalla completa
-        resolutionCombo.setEnabled(!settings.isFullscreen());
-        
-        return resolutionCombo;
+        combo.addActionListener(e -> {
+            settings.video.setResolution((String) combo.getSelectedItem());
+            settings.save(); // Hot reload
+        });
+        return combo;
     }
     
     private JComponent createFullscreenControl() {
-        fullscreenCheck = new JCheckBox();
-        fullscreenCheck.setSelected(settings.isFullscreen());
-        fullscreenCheck.setBackground(GameConstants.COLOR_BACKGROUND);
-        fullscreenCheck.setForeground(GameConstants.COLOR_TEXT_PRIMARY);
-        fullscreenCheck.setFont(GameConstants.FONT_TEXT);
-        fullscreenCheck.setFocusPainted(false);
+        JCheckBox check = new JCheckBox();
+        check.setBackground(GameConstants.COLOR_BACKGROUND);
+        check.setSelected(settings.video.isFullscreen());
         
-        // Al cambiar, habilitar/deshabilitar resolución
-        fullscreenCheck.addActionListener(e -> {
-            resolutionCombo.setEnabled(!fullscreenCheck.isSelected());
+        check.addActionListener(e -> {
+            settings.video.setFullscreen(check.isSelected());
+            settings.save(); // Hot reload
         });
-        
-        return fullscreenCheck;
+        return check;
     }
     
     private JComponent createVolumeControl() {
-        volumeSlider = new CyberpunkSlider(0, 100, settings.getMasterVolume());
-        volumeSlider.setPreferredSize(new Dimension(300, 40));
-        
-        return volumeSlider;
+        CyberpunkSlider slider = new CyberpunkSlider(0, 100, settings.audio.getMasterVolume());
+        slider.addChangeListener(e -> {
+            settings.audio.setMasterVolume(slider.getValue());
+            // Don't save on every slide tick, maybe just apply?
+            // For simplicity, we won't save to disk on drag, but we could notify listeners.
+            // But here we just update the setting object which might trigger listeners if we implemented property change support.
+            // Our current GameSettings only notifies on save().
+            // To support true hot reload without saving to disk constantly, we should separate set() from save().
+            // But for this exercise, let's just save on release or accept it saves often.
+            if (!slider.getValueIsAdjusting()) {
+                settings.save();
+            }
+        });
+        return slider;
     }
     
     private JComponent createTextSizeControl() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(GameConstants.COLOR_BACKGROUND);
+        JCheckBox check = new JCheckBox();
+        check.setBackground(GameConstants.COLOR_BACKGROUND);
+        check.setSelected(settings.accessibility.isLargeText());
         
-        normalTextRadio = createStyledRadioButton("Normal", !settings.isLargeText());
-        largeTextRadio = createStyledRadioButton("Grande", settings.isLargeText());
-        
-        ButtonGroup group = new ButtonGroup();
-        group.add(normalTextRadio);
-        group.add(largeTextRadio);
-        
-        panel.add(normalTextRadio);
-        panel.add(Box.createVerticalStrut(5));
-        panel.add(largeTextRadio);
-        
-        return panel;
-    }
-    
-    /**
-     * Crea un radio button estilizado (DRY).
-     */
-    private JRadioButton createStyledRadioButton(String text, boolean selected) {
-        JRadioButton radio = new JRadioButton(text);
-        radio.setSelected(selected);
-        radio.setBackground(GameConstants.COLOR_BACKGROUND);
-        radio.setForeground(GameConstants.COLOR_TEXT_PRIMARY);
-        radio.setFont(GameConstants.FONT_TEXT);
-        radio.setFocusPainted(false);
-        return radio;
-    }
-    
-    private void addSettingRow(JPanel parent, String label, JComponent control) {
-        JPanel row = new JPanel(new BorderLayout(20, 0));
-        row.setBackground(GameConstants.COLOR_BACKGROUND);
-        row.setMaximumSize(new Dimension(600, 80));
-        
-        JLabel labelComp = new JLabel(label + ":");
-        labelComp.setFont(GameConstants.FONT_TEXT);
-        labelComp.setForeground(GameConstants.COLOR_TEXT_SECONDARY);
-        
-        row.add(labelComp, BorderLayout.WEST);
-        row.add(control, BorderLayout.EAST);
-        
-        parent.add(row);
-        parent.add(Box.createVerticalStrut(15));
-    }
-    
-    private void addSeparator(JPanel parent) {
-        JSeparator separator = new JSeparator();
-        separator.setForeground(GameConstants.COLOR_CYAN_NEON);
-        separator.setMaximumSize(new Dimension(600, 1));
-        parent.add(separator);
-        parent.add(Box.createVerticalStrut(10));
-    }
-    
-    private void saveAndApply() {
-        // Guardar valores
-        settings.setResolution((String) resolutionCombo.getSelectedItem());
-        settings.setFullscreen(fullscreenCheck.isSelected());
-        settings.setMasterVolume(volumeSlider.getValue());
-        settings.setLargeText(largeTextRadio.isSelected());
-        
-        // Persistir
-        settings.saveSettings();
-        
-        // Aplicar cambios
-        applier.applyAll();
-        
-        // Volver al menú
-        Timer timer = new Timer(200, e -> {
-            ((Timer) e.getSource()).stop();
-            onBack.accept(null);
+        check.addActionListener(e -> {
+            settings.accessibility.setLargeText(check.isSelected());
+            settings.save();
         });
-        timer.setRepeats(false);
-        timer.start();
+        return check;
     }
-    
-    public void show() {
-        requestFocusInWindow();
+
+    private JComponent createLanguageControl() {
+        String[] langs = {"en", "es"};
+        CyberpunkComboBox<String> combo = new CyberpunkComboBox<>(langs);
+        combo.setSelectedItem(settings.localization.getLanguage());
+        
+        combo.addActionListener(e -> {
+            String newLang = (String) combo.getSelectedItem();
+            if (!newLang.equals(settings.localization.getLanguage())) {
+                settings.localization.setLanguage(newLang);
+                settings.save();
+                buildUI(); // Rebuild UI to show new language
+            }
+        });
+        return combo;
+    }
+
+    private JComponent createThemeControl() {
+        String[] themes = {"CYAN", "PURPLE"};
+        CyberpunkComboBox<String> combo = new CyberpunkComboBox<>(themes);
+        combo.setSelectedItem(settings.gameplay.getTheme());
+        
+        combo.addActionListener(e -> {
+            settings.gameplay.setTheme((String) combo.getSelectedItem());
+            settings.save();
+        });
+        return combo;
     }
 }
+

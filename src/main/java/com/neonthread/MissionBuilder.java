@@ -38,12 +38,25 @@ public class MissionBuilder {
     // Spawn conditions
     private Integer minReputation = null;
     private Integer maxReputation = null;
+    private Integer minNotoriety = null;
+    private Integer maxNotoriety = null;
+    private Integer minKarma = null;
+    private Integer maxKarma = null;
     private List<String> requiredFlags = new ArrayList<>();
     private List<String> forbiddenFlags = new ArrayList<>();
     private String requiredDistrictState = null;
     
     // Consequences
     private List<String> flagsToSet = new ArrayList<>();
+    
+    // ... setters ...
+    public MissionBuilder setMinReputation(int min) { this.minReputation = min; return this; }
+    public MissionBuilder setMaxReputation(int max) { this.maxReputation = max; return this; }
+    public MissionBuilder setMinNotoriety(int min) { this.minNotoriety = min; return this; }
+    public MissionBuilder setMaxNotoriety(int max) { this.maxNotoriety = max; return this; }
+    public MissionBuilder setMinKarma(int min) { this.minKarma = min; return this; }
+    public MissionBuilder setMaxKarma(int max) { this.maxKarma = max; return this; }
+    public MissionBuilder addRequiredFlag(String flag) { this.requiredFlags.add(flag); return this; }
     private List<String> flagsToClear = new ArrayList<>();
     private int reputationDelta = 0;
     private String districtChangeId = null;
@@ -122,21 +135,6 @@ public class MissionBuilder {
     
     // ==================== SPAWN CONDITIONS ====================
     
-    public MissionBuilder setMinReputation(int min) {
-        this.minReputation = min;
-        return this;
-    }
-    
-    public MissionBuilder setMaxReputation(int max) {
-        this.maxReputation = max;
-        return this;
-    }
-    
-    public MissionBuilder addRequiredFlag(String flag) {
-        this.requiredFlags.add(flag);
-        return this;
-    }
-    
     public MissionBuilder addForbiddenFlag(String flag) {
         this.forbiddenFlags.add(flag);
         return this;
@@ -213,12 +211,13 @@ public class MissionBuilder {
         
         // Configurar spawn conditions
         Mission.SpawnConditions spawnConditions = mission.getSpawnConditions();
-        if (minReputation != null) {
-            spawnConditions.setMinReputation(minReputation);
-        }
-        if (maxReputation != null) {
-            spawnConditions.setMaxReputation(maxReputation);
-        }
+        if (minReputation != null) spawnConditions.setMinReputation(minReputation);
+        if (maxReputation != null) spawnConditions.setMaxReputation(maxReputation);
+        if (minNotoriety != null) spawnConditions.setMinNotoriety(minNotoriety);
+        if (maxNotoriety != null) spawnConditions.setMaxNotoriety(maxNotoriety);
+        if (minKarma != null) spawnConditions.setMinKarma(minKarma);
+        if (maxKarma != null) spawnConditions.setMaxKarma(maxKarma);
+        
         for (String flag : requiredFlags) {
             spawnConditions.addRequiredFlag(flag);
         }

@@ -1,5 +1,9 @@
 package com.neonthread;
 
+import com.neonthread.inventory.UpgradeManager;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Singleton que mantiene el estado de la sesión de juego actual (DRY).
  * Centraliza el acceso al personaje, distrito, misión activa y estado del mundo.
@@ -12,10 +16,13 @@ public class GameSession {
     private Mission currentMission;
     private GameLog gameLog;
     private WorldState worldState;
+    private UpgradeManager upgradeManager;
+    private final Set<String> completedMissions = new HashSet<>();
     
     private GameSession() {
         this.gameLog = new GameLog();
         this.worldState = WorldState.getInstance();
+        this.upgradeManager = new UpgradeManager();
     }
     
     public static GameSession getInstance() {
@@ -23,6 +30,10 @@ public class GameSession {
             instance = new GameSession();
         }
         return instance;
+    }
+
+    public UpgradeManager getUpgradeManager() {
+        return upgradeManager;
     }
     
     /**
@@ -34,6 +45,8 @@ public class GameSession {
         this.currentMission = null;
         this.gameLog.clear();
         this.worldState.reset();
+        this.completedMissions.clear();
+        this.upgradeManager = new UpgradeManager();
         this.gameLog.add("Sesión iniciada: " + character.getName());
         initializeStartingMissions();
     }
@@ -42,16 +55,24 @@ public class GameSession {
      * Inicializa las misiones de inicio.
      */
     private void initializeStartingMissions() {
-        Mission firstMission = new Mission(
-            "mission_01",
-            "Primera Conexión",
-            "Una figura encapuchada te contacta en la esquina. Dice tener información sobre la megacorp que controla el sector.",
-            500,
-            Mission.MissionType.MAIN
-        );
-        firstMission.setPriority(Mission.MissionPriority.HIGH);
-        firstMission.setUrgency(Mission.MissionUrgency.NORMAL);
-        district.addMission(firstMission);
+        java.util.List<Mission> missions = com.neonthread.loaders.MissionLoader.loadMissions();
+        
+        if (missions.isEmpty()) {
+            // Fallback if no missions loaded
+            Mission firstMission = MissionBuilder.createMain(
+                "mission_01",
+                "Primera Conexión",
+                "Una figura encapuchada te contacta en la esquina. Dice tener información sobre la megacorp que controla el sector."
+            )
+            .setReward(500, "Datos encriptados")
+            .setUrgency(Mission.MissionUrgency.NORMAL)
+            .build();
+            district.addMission(firstMission);
+        } else {
+            for (Mission mission : missions) {
+                district.addMission(mission);
+            }
+        }
     }
     
     /**
@@ -73,5 +94,13 @@ public class GameSession {
     
     public boolean hasActiveSession() {
         return character != null && district != null;
+    }
+
+    public void registerMissionCompleted(String missionId) {
+        completedMissions.add(missionId);
+    }
+
+    public boolean hasCompleted(String missionId) {
+        return completedMissions.contains(missionId);
     }
 }

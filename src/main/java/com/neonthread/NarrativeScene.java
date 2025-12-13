@@ -1,5 +1,10 @@
 package com.neonthread;
 
+import com.neonthread.inventory.InventoryItem;
+import com.neonthread.inventory.ItemRegistry;
+import com.neonthread.stats.StatEffectApplier;
+import com.neonthread.stats.StatType;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -134,22 +139,17 @@ public class NarrativeScene {
      * Check de atributo o recurso (DRY).
      */
     public static class AttributeCheck {
-        public enum CheckType {
-            INTELLIGENCE, PHYSICAL, PERCEPTION, CHARISMA,
-            BATTERY, CREDITS, REPUTATION
-        }
-        
-        private CheckType tipo;
+        private StatType tipo;
         private int valorMinimo;
         private String descripcion;
         
-        public AttributeCheck(CheckType tipo, int valorMinimo, String descripcion) {
+        public AttributeCheck(StatType tipo, int valorMinimo, String descripcion) {
             this.tipo = tipo;
             this.valorMinimo = valorMinimo;
             this.descripcion = descripcion;
         }
         
-        public CheckType getTipo() { return tipo; }
+        public StatType getTipo() { return tipo; }
         public int getValorMinimo() { return valorMinimo; }
         public String getDescripcion() { return descripcion; }
         
@@ -158,13 +158,24 @@ public class NarrativeScene {
          */
         public boolean evaluar(Character character) {
             switch (tipo) {
-                case INTELLIGENCE: return character.getIntelligence() >= valorMinimo;
-                case PHYSICAL: return character.getPhysical() >= valorMinimo;
-                case PERCEPTION: return character.getPerception() >= valorMinimo;
-                case CHARISMA: return character.getCharisma() >= valorMinimo;
+                case INTELLIGENCE:
+                case PHYSICAL:
+                case PERCEPTION:
+                case CHARISMA:
+                    return character.getEffectiveAttribute(tipo) >= valorMinimo;
+                case HACK:
+                case COMBAT:
+                case STEALTH:
+                case NEGOTIATION:
+                case ANALYSIS:
+                    return character.getEffectiveCapability(tipo) >= valorMinimo;
                 case BATTERY: return character.getBattery() >= valorMinimo;
                 case CREDITS: return character.getCredits() >= valorMinimo;
                 case REPUTATION: return character.getReputation() >= valorMinimo;
+                case KARMA: return character.getKarma() >= valorMinimo;
+                case NOTORIETY: return character.getNotoriety() >= valorMinimo;
+                case ENERGY: return character.getEnergy() >= valorMinimo;
+                case HEALTH: return character.getHealth() >= valorMinimo;
                 default: return false;
             }
         }
@@ -176,6 +187,7 @@ public class NarrativeScene {
     public static class Consequence {
         public enum ConsequenceType {
             CHANGE_BATTERY, CHANGE_CREDITS, CHANGE_REPUTATION, CHANGE_NOTORIETY,
+            CHANGE_KARMA, CHANGE_ENERGY, CHANGE_HEALTH,
             ADD_ITEM, REMOVE_ITEM, SET_FLAG, ADD_LOG
         }
         
@@ -199,20 +211,35 @@ public class NarrativeScene {
         public void aplicar(Character character, Map<String, Boolean> worldFlags, GameLog log) {
             switch (tipo) {
                 case CHANGE_BATTERY:
-                    character.setBattery(character.getBattery() + valor);
-                    if (log != null) log.add("Energía: " + (valor > 0 ? "+" : "") + valor);
+                    if (valor < 0) StatEffectApplier.consumeBattery(character, -valor);
+                    else character.setBattery(character.getBattery() + valor);
+                    if (log != null) log.add("Batería: " + (valor > 0 ? "+" : "") + valor);
                     break;
                 case CHANGE_CREDITS:
                     character.setCredits(character.getCredits() + valor);
                     if (log != null) log.add("Créditos: " + (valor > 0 ? "+" : "") + valor);
                     break;
                 case CHANGE_REPUTATION:
-                    character.setReputation(character.getReputation() + valor);
+                    StatEffectApplier.addReputation(character, valor);
                     if (log != null) log.add("Reputación: " + (valor > 0 ? "+" : "") + valor);
                     break;
                 case CHANGE_NOTORIETY:
-                    character.setNotoriety(character.getNotoriety() + valor);
+                    StatEffectApplier.addNotoriety(character, valor);
                     if (log != null) log.add("Notoriedad: " + (valor > 0 ? "+" : "") + valor);
+                    break;
+                case CHANGE_KARMA:
+                    StatEffectApplier.addKarma(character, valor);
+                    if (log != null) log.add("Karma: " + (valor > 0 ? "+" : "") + valor);
+                    break;
+                case CHANGE_ENERGY:
+                    if (valor < 0) StatEffectApplier.consumeEnergy(character, -valor);
+                    else character.setEnergy(character.getEnergy() + valor);
+                    if (log != null) log.add("Energía: " + (valor > 0 ? "+" : "") + valor);
+                    break;
+                case CHANGE_HEALTH:
+                    if (valor < 0) StatEffectApplier.applyDamage(character, -valor);
+                    else StatEffectApplier.applyHealing(character, valor);
+                    if (log != null) log.add("Salud: " + (valor > 0 ? "+" : "") + valor);
                     break;
                 case SET_FLAG:
                     worldFlags.put(key, valor > 0);
@@ -221,10 +248,18 @@ public class NarrativeScene {
                     if (log != null) log.add(key);
                     break;
                 case ADD_ITEM:
-                    // Implementación futura con sistema de inventario
-                    if (log != null) log.add("Item adquirido: " + key);
+                    InventoryItem itemToAdd = ItemRegistry.getItem(key);
+                    if (itemToAdd != null) {
+                        character.getInventory().addItem(itemToAdd);
+                        if (log != null) log.add("Item adquirido: " + itemToAdd.getName());
+                    } else {
+                        if (log != null) log.add("Error: Item desconocido " + key);
+                    }
                     break;
                 case REMOVE_ITEM:
+                    // Need to find item in inventory by ID
+                    // For now, simplified removal if we had a way to look up in inventory by ID
+                    // character.getInventory().removeItemById(key);
                     if (log != null) log.add("Item usado: " + key);
                     break;
             }

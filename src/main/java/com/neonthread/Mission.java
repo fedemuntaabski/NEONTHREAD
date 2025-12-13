@@ -34,9 +34,10 @@ public class Mission {
     private MissionUrgency urgency;
     
     // Legado (mantener compatibilidad)
+    @Deprecated
     private List<String> unlocks; // Locaciones/NPCs que desbloquea
+    @Deprecated
     private String nextSceneId; // Primera escena narrativa (default)
-    private boolean completed;
     
     public Mission(String id, String title, String description, int rewardCredits, MissionType type) {
         this.id = id;
@@ -49,7 +50,6 @@ public class Mission {
         this.requirements = new ArrayList<>();
         this.unlocks = new ArrayList<>();
         this.nextSceneId = null;
-        this.completed = false;
         
         // Nuevos sistemas (valores por defecto)
         this.spawnConditions = new SpawnConditions();
@@ -105,8 +105,7 @@ public class Mission {
     /**
      * Completa la misión con un outcome específico.
      */
-    public void complete(MissionOutcome outcome) { 
-        this.completed = true;
+    public void complete(MissionOutcome outcome, Character character) { 
         
         switch (outcome) {
             case SUCCESS:
@@ -124,28 +123,28 @@ public class Mission {
         }
         
         // Aplicar consecuencias
-        consequences.apply();
+        consequences.apply(character);
     }
     
     /**
      * Completa la misión (legacy - por defecto SUCCESS).
      */
-    public void complete() { 
-        complete(MissionOutcome.SUCCESS);
+    public void complete(Character character) { 
+        complete(MissionOutcome.SUCCESS, character);
     }
     
     /**
      * Falla la misión.
      */
-    public void fail() {
-        complete(MissionOutcome.FAILURE);
+    public void fail(Character character) {
+        complete(MissionOutcome.FAILURE, character);
     }
     
     /**
      * Aborta la misión.
      */
-    public void abort() {
-        complete(MissionOutcome.ABORTED);
+    public void abort(Character character) {
+        complete(MissionOutcome.ABORTED, character);
     }
     
     /**
@@ -189,8 +188,16 @@ public class Mission {
     /**
      * Verifica si la misión puede aparecer según las condiciones.
      */
-    public boolean canSpawn(WorldState worldState) {
-        return spawnConditions.isMet(worldState);
+    public boolean canSpawn(WorldState worldState, Character character) {
+        // Verificar requisitos de misiones previas
+        GameSession session = GameSession.getInstance();
+        for (String requiredMissionId : requirements) {
+            if (!session.hasCompleted(requiredMissionId)) {
+                return false;
+            }
+        }
+        
+        return spawnConditions.isMet(worldState, character);
     }
     
     /**
@@ -289,24 +296,39 @@ public class Mission {
      * Condiciones para que aparezca una misión (KISS).
      */
     public static class SpawnConditions {
-        private int minReputation = 0;
+        private int minReputation = Integer.MIN_VALUE;
         private int maxReputation = Integer.MAX_VALUE;
+        private int minNotoriety = Integer.MIN_VALUE;
+        private int maxNotoriety = Integer.MAX_VALUE;
+        private int minKarma = Integer.MIN_VALUE;
+        private int maxKarma = Integer.MAX_VALUE;
         private List<String> requiredFlags = new ArrayList<>();
         private List<String> forbiddenFlags = new ArrayList<>();
         private String requiredDistrictState = null;
         
         public void setMinReputation(int min) { this.minReputation = min; }
         public void setMaxReputation(int max) { this.maxReputation = max; }
+        public void setMinNotoriety(int min) { this.minNotoriety = min; }
+        public void setMaxNotoriety(int max) { this.maxNotoriety = max; }
+        public void setMinKarma(int min) { this.minKarma = min; }
+        public void setMaxKarma(int max) { this.maxKarma = max; }
         public void addRequiredFlag(String flag) { this.requiredFlags.add(flag); }
         public void addForbiddenFlag(String flag) { this.forbiddenFlags.add(flag); }
         public void setRequiredDistrictState(String state) { this.requiredDistrictState = state; }
         
-        public boolean isMet(WorldState worldState) {
+        public boolean isMet(WorldState worldState, Character character) {
             if (worldState == null) return true;
             
-            // Verificar reputación
-            int rep = worldState.getReputation();
-            if (rep < minReputation || rep > maxReputation) return false;
+            // Verificar reputación, notoriedad y karma
+            if (character != null) {
+                if (character.getReputation() < minReputation || character.getReputation() > maxReputation) return false;
+                if (character.getNotoriety() < minNotoriety || character.getNotoriety() > maxNotoriety) return false;
+                if (character.getKarma() < minKarma || character.getKarma() > maxKarma) return false;
+            } else {
+                // Fallback to WorldState for reputation if character is null (legacy)
+                int rep = worldState.getReputation();
+                if (rep < minReputation || rep > maxReputation) return false;
+            }
             
             // Verificar flags requeridos
             for (String flag : requiredFlags) {
@@ -351,9 +373,9 @@ public class Mission {
         public List<String> getNarrativeItems() { return narrativeItems; }
         
         /**
-         * Aplica las consecuencias al WorldState.
+         * Aplica las consecuencias al WorldState y Character.
          */
-        public void apply() {
+        public void apply(Character character) {
             WorldState worldState = WorldState.getInstance();
             
             // Aplicar flags
@@ -366,7 +388,11 @@ public class Mission {
             
             // Aplicar reputación
             if (reputationDelta != 0) {
+                // Update both for now to maintain compatibility
                 worldState.modifyReputation(reputationDelta);
+                if (character != null) {
+                    character.setReputation(character.getReputation() + reputationDelta);
+                }
             }
             
             // Aplicar items narrativos
@@ -376,7 +402,12 @@ public class Mission {
             
             // Estado del distrito (implementación futura)
             if (districtChangeId != null) {
-                worldState.setDistrictState(districtChangeId);
+                try {
+                    worldState.applyChange(DistrictChange.valueOf(districtChangeId));
+                } catch (IllegalArgumentException e) {
+                    // Fallback for legacy string states if any
+                    worldState.setDistrictState(districtChangeId);
+                }
             }
         }
     }

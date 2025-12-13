@@ -18,6 +18,7 @@ public class WorldState {
     private Map<String, Boolean> narrativeFlags;
     
     // Sistema de reputación (puede expandirse a múltiples facciones)
+    @Deprecated
     private int globalReputation;
     
     // Items narrativos obtenidos (llaves, chips, datos, etc.)
@@ -25,6 +26,7 @@ public class WorldState {
     
     // Estado actual del distrito
     private String districtState;
+    private final Set<DistrictChange> activeChanges = new HashSet<>();
     
     private WorldState() {
         this.narrativeFlags = new HashMap<>();
@@ -48,6 +50,7 @@ public class WorldState {
         globalReputation = 0;
         narrativeItems.clear();
         districtState = "normal";
+        activeChanges.clear();
     }
     
     // ==================== FLAGS NARRATIVOS ====================
@@ -90,7 +93,9 @@ public class WorldState {
     
     /**
      * Obtiene la reputación global.
+     * @deprecated Use Character.getReputation() instead.
      */
+    @Deprecated
     public int getReputation() {
         return globalReputation;
     }
@@ -166,6 +171,14 @@ public class WorldState {
      */
     public void setDistrictState(String state) {
         this.districtState = state;
+    }
+
+    public void applyChange(DistrictChange change) {
+        activeChanges.add(change);
+    }
+
+    public boolean hasChange(DistrictChange change) {
+        return activeChanges.contains(change);
     }
     
     // ==================== DEBUG Y UTILIDADES ====================

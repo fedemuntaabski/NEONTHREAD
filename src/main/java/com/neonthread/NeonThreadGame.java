@@ -2,6 +2,8 @@ package com.neonthread;
 
 import com.neonthread.screens.*;
 
+import com.neonthread.stats.StatType;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -17,7 +19,6 @@ public class NeonThreadGame extends JFrame {
     private BootstrapScreen bootstrapScreen;
     private BootScreen bootScreen;
     private LogoScreen logoScreen;
-    private TitleScreen titleScreen;
     private MenuScreen menuScreen;
     private SettingsScreen settingsScreen;
     
@@ -30,6 +31,7 @@ public class NeonThreadGame extends JFrame {
     private NarrativeSceneScreen narrativeSceneScreen;
     private ResultScreen resultScreen;
     private PauseScreen pauseScreen;
+    private InventoryScreen inventoryScreen;
     
     public NeonThreadGame() {
         initializeWindow();
@@ -45,6 +47,9 @@ public class NeonThreadGame extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         getContentPane().setBackground(GameConstants.COLOR_BACKGROUND);
+        
+        // Apply initial settings
+        new SettingsApplier(this).applyAll();
     }
     
     private void initializeScreens() {
@@ -52,7 +57,6 @@ public class NeonThreadGame extends JFrame {
         bootstrapScreen = new BootstrapScreen(this::changeState);
         bootScreen = new BootScreen(this::changeState);
         logoScreen = new LogoScreen(this::changeState);
-        titleScreen = new TitleScreen(this::changeState);
         menuScreen = new MenuScreen();
         settingsScreen = new SettingsScreen(v -> changeState(GameState.STATE_MENU), this);
         
@@ -68,6 +72,7 @@ public class NeonThreadGame extends JFrame {
         missionWindowScreen = new MissionWindowScreen(this::changeState);
         narrativeSceneScreen = new NarrativeSceneScreen(this::changeState);
         resultScreen = new ResultScreen(this::changeState);
+        inventoryScreen = new InventoryScreen(this::changeState);
     }
     
     /**
@@ -89,10 +94,27 @@ public class NeonThreadGame extends JFrame {
     }
     
     private void handlePause() {
-        // Solo pausar durante gameplay
+        // District map: ESC exits the district (flow improvement)
+        // Handled in DistrictMapScreen now, but keep here as fallback or global override if needed.
+        // Actually, if DistrictMapScreen consumes ESC, this might not trigger if focus is there.
+        // But JRootPane bindings usually work globally.
+        // Let's keep it consistent. If in DistrictMap, maybe just pause?
+        // User requested "ESC exits the district" in previous turn, but now we have a Pause Menu.
+        // Standard game behavior: ESC -> Pause Menu.
+        // Let's change DistrictMap behavior to Pause Menu as well.
+        
+        if (currentState == null) return;
+
         if (isGameplayState(currentState) && currentState != GameState.STATE_PAUSE) {
             previousState = currentState;
             changeState(GameState.STATE_PAUSE);
+        } else if (currentState == GameState.STATE_PAUSE) {
+            if (previousState != null) {
+                changeState(previousState);
+            } else {
+                // Fallback if previous state is lost
+                changeState(GameState.STATE_MENU);
+            }
         }
     }
     
@@ -127,11 +149,6 @@ public class NeonThreadGame extends JFrame {
             case STATE_LOGO_GLITCH:
                 getContentPane().add(logoScreen);
                 logoScreen.show();
-                break;
-                
-            case STATE_TITLE:
-                getContentPane().add(titleScreen);
-                titleScreen.show();
                 break;
                 
             case STATE_MENU:
@@ -171,8 +188,11 @@ public class NeonThreadGame extends JFrame {
                 
             case STATE_NARRATIVE_SCENE:
                 getContentPane().add(narrativeSceneScreen);
-                // Crear escena inicial de ejemplo
-                NarrativeScene initialScene = createInitialScene();
+                // Cargar escena inicial desde JSON
+                NarrativeScene initialScene = com.neonthread.loaders.SceneLoader.getScene("scene_01");
+                if (initialScene == null) {
+                    initialScene = createInitialScene();
+                }
                 narrativeSceneScreen.startScene(initialScene);
                 break;
                 
@@ -181,12 +201,20 @@ public class NeonThreadGame extends JFrame {
                 resultScreen.showResults(narrativeSceneScreen.getHistory());
                 break;
                 
+            case STATE_INVENTORY:
+                getContentPane().add(inventoryScreen);
+                inventoryScreen.setBackAction(() -> changeState(previousState != null ? previousState : GameState.STATE_MENU));
+                inventoryScreen.refresh();
+                break;
+                
             case STATE_PAUSE:
                 pauseScreen = new PauseScreen(
                     this::changeState,
                     () -> {
-                        // TODO: Mostrar settings desde pausa
-                        changeState(previousState);
+                        // Mostrar settings desde pausa
+                        changeState(GameState.STATE_SETTINGS);
+                        // Configure settings screen to go back to pause
+                        settingsScreen.setBackAction(v -> changeState(GameState.STATE_PAUSE));
                     },
                     previousState
                 );
@@ -224,7 +252,7 @@ public class NeonThreadGame extends JFrame {
             "Descifrar el mensaje usando tus implantes", "scene_success"
         );
         option1.addCheck(new NarrativeScene.AttributeCheck(
-            NarrativeScene.AttributeCheck.CheckType.INTELLIGENCE, 4, "Inteligencia ≥ 4"
+            StatType.INTELLIGENCE, 4, "Inteligencia ≥ 4"
         ));
         option1.addConsecuencia(new NarrativeScene.Consequence(
             NarrativeScene.Consequence.ConsequenceType.ADD_LOG, 
@@ -239,7 +267,7 @@ public class NeonThreadGame extends JFrame {
             "Buscar trampas en el área antes de avanzar", "scene_success"
         );
         option2.addCheck(new NarrativeScene.AttributeCheck(
-            NarrativeScene.AttributeCheck.CheckType.PERCEPTION, 3, "Percepción ≥ 3"
+            StatType.PERCEPTION, 3, "Percepción ≥ 3"
         ));
         option2.addConsecuencia(new NarrativeScene.Consequence(
             NarrativeScene.Consequence.ConsequenceType.CHANGE_BATTERY, "", -10

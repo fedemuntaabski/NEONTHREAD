@@ -1,4 +1,0 @@
-resolution=1920x1080
-fullscreen=true
-masterVolume=70
-largeText=true

@@ -70,7 +70,7 @@ public class LogoScreen extends JPanel {
                 Timer displayTimer = new Timer(1500, ev -> {
                     ((Timer)ev.getSource()).stop();
                     cleanup();
-                    onComplete.accept(GameState.STATE_TITLE);
+                    onComplete.accept(GameState.STATE_MENU);
                 });
                 displayTimer.setRepeats(false);
                 displayTimer.start();

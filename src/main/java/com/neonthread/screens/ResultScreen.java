@@ -28,7 +28,7 @@ public class ResultScreen extends JPanel {
     }
     
     /**
-     * Muestra los resultados de la misión con historial (KISS).
+     * Shows mission results with history (KISS).
      */
     public void showResults(MissionHistory missionHistory) {
         this.history = missionHistory;
@@ -46,21 +46,21 @@ public class ResultScreen extends JPanel {
         contentPanel.setBackground(new Color(0x0A0A0F));
         contentPanel.setBorder(BorderFactory.createEmptyBorder(60, 100, 60, 100));
         
-        // Título principal
+        // Main title
         addTitle(contentPanel);
         
-        // Resultado narrativo
+        // Narrative result
         addNarrativeResult(contentPanel, mission);
         
-        // Recompensas
+        // Rewards
         addRewardsSection(contentPanel, mission);
         
-        // Estadísticas
+        // Statistics
         if (history != null) {
             addStatisticsSection(contentPanel, history);
         }
         
-        // Botones de acción
+        // Action buttons
         addActionButtons(contentPanel, mission);
         
         // Aplicar recompensas al personaje
@@ -82,10 +82,10 @@ public class ResultScreen extends JPanel {
     }
     
     /**
-     * Añade el título principal (KISS).
+     * Adds the main title (KISS).
      */
     private void addTitle(JPanel panel) {
-        JLabel titleLabel = new JLabel("MISIÓN COMPLETADA");
+        JLabel titleLabel = new JLabel("MISSION COMPLETED");
         titleLabel.setFont(GameConstants.FONT_TITLE.deriveFont(32f));
         titleLabel.setForeground(GameConstants.COLOR_CYAN_NEON);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -106,10 +106,10 @@ public class ResultScreen extends JPanel {
     }
     
     /**
-     * Añade el resultado narrativo (DRY).
+     * Adds the narrative result (DRY).
      */
     private void addNarrativeResult(JPanel panel, Mission mission) {
-        JLabel sectionTitle = new JLabel("RESULTADO NARRATIVO");
+        JLabel sectionTitle = new JLabel("NARRATIVE RESULT");
         sectionTitle.setFont(GameConstants.FONT_MENU.deriveFont(16f));
         sectionTitle.setForeground(GameConstants.COLOR_TEXT_SECONDARY);
         sectionTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -139,28 +139,28 @@ public class ResultScreen extends JPanel {
     }
     
     /**
-     * Genera texto narrativo del resultado (DRY).
+     * Generates narrative result text (DRY).
      */
     private String generateNarrativeResult(Mission mission) {
         com.neonthread.Character character = session.getCharacter();
         
         return String.format(
-            "Has completado la misión '%s'. Tu intervención en el distrito ha dejado huella. " +
-            "Los datos que recopilaste serán de gran valor para futuras operaciones. " +
-            "%s observa tus acciones con interés.",
+            "You have completed the mission '%s'. Your intervention in the district has left its mark. " +
+            "The data you collected will be of great value for future operations. " +
+            "%s observes your actions with interest.",
             mission.getTitle(),
             character.getRole().getDisplayName()
         );
     }
     
     /**
-     * Añade la sección de recompensas con animación (KISS).
+     * Adds the rewards section with animation (KISS).
      */
     private void addRewardsSection(JPanel panel, Mission mission) {
         panel.add(createSeparator());
         panel.add(Box.createVerticalStrut(25));
         
-        JLabel sectionTitle = new JLabel("RECOMPENSAS");
+        JLabel sectionTitle = new JLabel("REWARDS");
         sectionTitle.setFont(GameConstants.FONT_MENU.deriveFont(16f));
         sectionTitle.setForeground(GameConstants.COLOR_TEXT_SECONDARY);
         sectionTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -174,7 +174,7 @@ public class ResultScreen extends JPanel {
         rewardsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         // Créditos
-        addRewardItem(rewardsPanel, "✦ Créditos ganados: +" + mission.getRewardCredits(), 
+        addRewardItem(rewardsPanel, "✦ Credits earned: +" + mission.getRewardCredits(), 
                      GameConstants.COLOR_MAGENTA_NEON);
         
         // Información
@@ -182,27 +182,27 @@ public class ResultScreen extends JPanel {
             addRewardItem(rewardsPanel, "✦ " + mission.getRewardInfo(), 
                          GameConstants.COLOR_CYAN_NEON);
         } else {
-            addRewardItem(rewardsPanel, "✦ Información clasificada: +1", 
+            addRewardItem(rewardsPanel, "✦ Classified information: +1", 
                          GameConstants.COLOR_CYAN_NEON);
         }
         
         // Desbloqueos
         if (!mission.getUnlocks().isEmpty()) {
             for (String unlock : mission.getUnlocks()) {
-                addRewardItem(rewardsPanel, "✦ Desbloqueado: " + unlock, 
+                addRewardItem(rewardsPanel, "✦ Unlocked: " + unlock, 
                              GameConstants.COLOR_YELLOW_NEON);
             }
         }
         
         // Reputación
-        addRewardItem(rewardsPanel, "✦ Reputación: +1", GameConstants.COLOR_BLUE_ELECTRIC);
+        addRewardItem(rewardsPanel, "✦ Reputation: +1", GameConstants.COLOR_BLUE_ELECTRIC);
         
         panel.add(rewardsPanel);
         panel.add(Box.createVerticalStrut(30));
     }
     
     /**
-     * Añade un item de recompensa (DRY).
+     * Adds a reward item (DRY).
      */
     private void addRewardItem(JPanel panel, String text, Color color) {
         JLabel itemLabel = new JLabel(text);
@@ -215,13 +215,13 @@ public class ResultScreen extends JPanel {
     }
     
     /**
-     * Añade la sección de estadísticas (KISS).
+     * Adds the statistics section (KISS).
      */
     private void addStatisticsSection(JPanel panel, MissionHistory history) {
         panel.add(createSeparator());
         panel.add(Box.createVerticalStrut(25));
         
-        JLabel sectionTitle = new JLabel("ESTADÍSTICAS DE LA RUN");
+        JLabel sectionTitle = new JLabel("RUN STATISTICS");
         sectionTitle.setFont(GameConstants.FONT_MENU.deriveFont(16f));
         sectionTitle.setForeground(GameConstants.COLOR_TEXT_SECONDARY);
         sectionTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -235,19 +235,19 @@ public class ResultScreen extends JPanel {
         statsGrid.setMaximumSize(new Dimension(700, 200));
         statsGrid.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        addStatItem(statsGrid, "Opciones tomadas", String.valueOf(history.getDecisionCount()));
-        addStatItem(statsGrid, "Checks superados", String.valueOf(history.getChecksSucceeded()));
-        addStatItem(statsGrid, "Checks fallados", String.valueOf(history.getChecksFailed()));
-        addStatItem(statsGrid, "Rutas secretas", String.valueOf(history.getSecretRoutesDiscovered().size()));
-        addStatItem(statsGrid, "Items recolectados", String.valueOf(history.getItemsCollected().size()));
-        addStatItem(statsGrid, "Tiempo total", history.getFormattedTime());
+        addStatItem(statsGrid, "Choices made", String.valueOf(history.getDecisionCount()));
+        addStatItem(statsGrid, "Checks passed", String.valueOf(history.getChecksSucceeded()));
+        addStatItem(statsGrid, "Checks failed", String.valueOf(history.getChecksFailed()));
+        addStatItem(statsGrid, "Secret routes", String.valueOf(history.getSecretRoutesDiscovered().size()));
+        addStatItem(statsGrid, "Items collected", String.valueOf(history.getItemsCollected().size()));
+        addStatItem(statsGrid, "Total time", history.getFormattedTime());
         
         panel.add(statsGrid);
         panel.add(Box.createVerticalStrut(30));
     }
     
     /**
-     * Añade un item de estadística (DRY).
+     * Adds a statistics item (DRY).
      */
     private void addStatItem(JPanel panel, String label, String value) {
         JPanel itemPanel = new JPanel(new BorderLayout());
@@ -272,7 +272,7 @@ public class ResultScreen extends JPanel {
     }
     
     /**
-     * Añade los botones de acción (KISS).
+     * Adds the action buttons (KISS).
      */
     private void addActionButtons(JPanel panel, Mission mission) {
         panel.add(createSeparator());
@@ -282,11 +282,11 @@ public class ResultScreen extends JPanel {
         buttonPanel.setOpaque(false);
         buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        CyberpunkButton volverBtn = new CyberpunkButton("VOLVER AL DISTRITO");
+        CyberpunkButton volverBtn = new CyberpunkButton("RETURN TO DISTRICT");
         volverBtn.setPreferredSize(new Dimension(220, 50));
         volverBtn.addActionListener(e -> volverAlDistrito());
         
-        CyberpunkButton repetirBtn = new CyberpunkButton("REPETIR MISIÓN");
+        CyberpunkButton repetirBtn = new CyberpunkButton("REPEAT MISSION");
         repetirBtn.setPreferredSize(new Dimension(180, 50));
         repetirBtn.addActionListener(e -> repetirMision(mission));
         
@@ -297,7 +297,7 @@ public class ResultScreen extends JPanel {
     }
     
     /**
-     * Aplica las recompensas al personaje (KISS).
+     * Applies rewards to the character (KISS).
      */
     private void applyRewards(Mission mission) {
         com.neonthread.Character character = session.getCharacter();
@@ -318,7 +318,8 @@ public class ResultScreen extends JPanel {
         }
         
         // Marcar misión completada
-        mission.complete();
+        mission.complete(character);
+        GameSession.getInstance().registerMissionCompleted(mission.getId());
         
         // Registrar en log
         if (log != null) {
@@ -332,7 +333,7 @@ public class ResultScreen extends JPanel {
     }
     
     /**
-     * Desbloquea misiones siguientes en cadena (DRY).
+     * Unlocks next missions in chain (DRY).
      */
     private void unlockNextMissions(Mission completedMission, District district) {
         if (district == null) return;
@@ -349,7 +350,7 @@ public class ResultScreen extends JPanel {
     }
     
     /**
-     * Limpia estados temporales (KISS).
+     * Clears temporary states (KISS).
      */
     private void clearTemporaryStates() {
         // Resetear flags temporales
@@ -358,7 +359,7 @@ public class ResultScreen extends JPanel {
     }
     
     /**
-     * Vuelve al distrito con actualización (KISS).
+     * Returns to district with update (KISS).
      */
     private void volverAlDistrito() {
         clearTemporaryStates();
@@ -367,13 +368,13 @@ public class ResultScreen extends JPanel {
     }
     
     /**
-     * Reinicia la misión (DRY).
+     * Restarts the mission (DRY).
      */
     private void repetirMision(Mission mission) {
         int confirm = JOptionPane.showConfirmDialog(
             this,
-            "¿Repetir la misión? No recibirás recompensas duplicadas.",
-            "Repetir Misión",
+            "Repeat the mission? You won't receive duplicate rewards.",
+            "Repeat Mission",
             JOptionPane.YES_NO_OPTION
         );
         
@@ -391,7 +392,7 @@ public class ResultScreen extends JPanel {
     }
     
     /**
-     * Crea un separador horizontal (DRY).
+     * Creates a horizontal separator (DRY).
      */
     private JSeparator createSeparator() {
         JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
