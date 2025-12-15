@@ -929,6 +929,53 @@ public class DistrictMapScreen extends JPanel {
                     g2d.setColor(new Color(0x403058));
                 }
             }
+            
+            // Visualizar zonas bloqueadas (Feature 6 - FASE 2)
+            if (session.getDistrictModifier() != null) {
+                drawBlockedZones(g2d, width, height);
+            }
+        }
+        
+        /**
+         * Dibuja overlay visual para zonas bloqueadas (FASE 2 Feature 6).
+         */
+        private void drawBlockedZones(Graphics2D g2d, int width, int height) {
+            java.util.List<String> blockedZones = session.getDistrictModifier().getBlockedZones();
+            if (blockedZones.isEmpty()) return;
+            
+            // Overlay semitransparente rojo sobre zonas bloqueadas
+            g2d.setColor(new Color(200, 50, 50, 60));
+            g2d.setStroke(new BasicStroke(3));
+            
+            for (String zoneId : blockedZones) {
+                // Ejemplo: bloquear cuadrante según ID
+                Rectangle zoneRect = getZoneRectangle(zoneId, width, height);
+                if (zoneRect != null) {
+                    g2d.fillRect(zoneRect.x, zoneRect.y, zoneRect.width, zoneRect.height);
+                    g2d.setColor(new Color(255, 100, 100, 200));
+                    g2d.drawRect(zoneRect.x, zoneRect.y, zoneRect.width, zoneRect.height);
+                    
+                    // Icono de bloqueo
+                    g2d.setFont(new Font(GameConstants.FONT_FAMILY, Font.BOLD, 48));
+                    g2d.drawString("🔒", zoneRect.x + zoneRect.width / 2 - 20, zoneRect.y + zoneRect.height / 2);
+                    
+                    g2d.setColor(new Color(200, 50, 50, 60));
+                }
+            }
+        }
+        
+        /**
+         * Mapea zone ID a rectángulo en el mapa (DRY helper).
+         */
+        private Rectangle getZoneRectangle(String zoneId, int width, int height) {
+            switch (zoneId) {
+                case "north": return new Rectangle(100, 50, width - 200, height / 3);
+                case "south": return new Rectangle(100, 2 * height / 3, width - 200, height / 3);
+                case "west": return new Rectangle(100, height / 3, width / 3, height / 3);
+                case "east": return new Rectangle(2 * width / 3, height / 3, width / 3, height / 3);
+                case "downtown": return new Rectangle(width / 3, height / 3, width / 3, height / 3);
+                default: return null;
+            }
         }
         
         /**

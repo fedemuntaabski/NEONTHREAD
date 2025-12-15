@@ -100,6 +100,15 @@ public class District {
     }
     
     /**
+     * Refresca las misiones disponibles según el estado del mundo.
+     * Útil para aplicar modificaciones del distrito.
+     */
+    public void refreshMissions() {
+        // Placeholder para lógica de refrescado dinámico
+        // Puede cargar nuevas misiones o cambiar disponibilidad según flags
+    }
+    
+    /**
      * Tipos de locaciones.
      */
     public enum LocationType {

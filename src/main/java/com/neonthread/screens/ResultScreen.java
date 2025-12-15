@@ -99,6 +99,11 @@ public class ResultScreen extends JPanel {
         panel.add(titleLabel);
         panel.add(Box.createVerticalStrut(15));
         
+        // Agregar resumen de memoria de run si está disponible
+        if (session.getRunMemory() != null) {
+            addRunMemorySummary(panel);
+        }
+        
         // Icono de éxito
         JLabel iconLabel = new JLabel("✓");
         iconLabel.setFont(new Font(GameConstants.FONT_FAMILY, Font.BOLD, 48));
@@ -406,5 +411,24 @@ public class ResultScreen extends JPanel {
         separator.setMaximumSize(new Dimension(800, 1));
         separator.setAlignmentX(Component.LEFT_ALIGNMENT);
         return separator;
+    }
+    
+    /**
+     * Agrega resumen de Run Memory al resultado.
+     */
+    private void addRunMemorySummary(JPanel panel) {
+        String summary = session.getRunMemory().generateSummary();
+        
+        JTextArea summaryArea = new JTextArea(summary);
+        summaryArea.setEditable(false);
+        summaryArea.setFont(new Font(GameConstants.FONT_FAMILY, Font.PLAIN, 11));
+        summaryArea.setForeground(GameConstants.COLOR_TEXT_SECONDARY);
+        summaryArea.setBackground(new Color(0x0A, 0x0A, 0x0F));
+        summaryArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        summaryArea.setMaximumSize(new Dimension(700, 300));
+        summaryArea.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        panel.add(summaryArea);
+        panel.add(Box.createVerticalStrut(20));
     }
 }

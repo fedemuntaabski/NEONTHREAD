@@ -306,6 +306,16 @@ public class NarrativeSceneScreen extends JPanel {
     private void selectOption(SceneOption option) {
         com.neonthread.Character character = session.getCharacter();
         
+        // Registrar decisión en RunMemory
+        Mission currentMission = session.getCurrentMission();
+        if (currentMission != null && session.getRunMemory() != null) {
+            session.getRunMemory().recordDecision(
+                currentMission.getId(),
+                "Choice Made",
+                option.getTexto()
+            );
+        }
+        
         // Registrar decisión
         if (history != null) {
             history.incrementDecisions();
@@ -323,6 +333,15 @@ public class NarrativeSceneScreen extends JPanel {
             // Aplicar consecuencias
             option.aplicarConsecuencias(character, worldFlags, session.getGameLog());
             
+            // Registrar consecuencia en RunMemory
+            if (currentMission != null && session.getRunMemory() != null) {
+                session.getRunMemory().recordConsequence(
+                    currentMission.getId(),
+                    "Action Consequence",
+                    "Choice accepted and executed"
+                );
+            }
+            
             // Ir a siguiente escena
             String nextSceneId = option.getSiguienteEscena();
             if (nextSceneId != null) {
@@ -332,6 +351,15 @@ public class NarrativeSceneScreen extends JPanel {
             // Registrar fallo
             if (history != null) {
                 history.recordCheckFailed();
+            }
+            
+            // Registrar fallo en RunMemory
+            if (currentMission != null && session.getRunMemory() != null) {
+                session.getRunMemory().recordConsequence(
+                    currentMission.getId(),
+                    "Failed Check",
+                    "Unable to execute action due to insufficient stats"
+                );
             }
             
             // Ir a escena de fallo

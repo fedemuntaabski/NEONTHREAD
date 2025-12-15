@@ -17,12 +17,15 @@ public class GameSession {
     private GameLog gameLog;
     private WorldState worldState;
     private UpgradeManager upgradeManager;
+    private RunMemory runMemory;
+    private DistrictModifier districtModifier;
     private final Set<String> completedMissions = new HashSet<>();
     
     private GameSession() {
         this.gameLog = new GameLog();
         this.worldState = WorldState.getInstance();
         this.upgradeManager = new UpgradeManager();
+        this.runMemory = new RunMemory();
     }
     
     public static GameSession getInstance() {
@@ -47,8 +50,15 @@ public class GameSession {
         this.worldState.reset();
         this.completedMissions.clear();
         this.upgradeManager = new UpgradeManager();
+        this.runMemory = new RunMemory();
+        this.districtModifier = new DistrictModifier(district, worldState);
+        
         this.gameLog.add("Sesión iniciada: " + character.getName());
+        this.runMemory.recordSystemEvent("Run Started", 
+            "Operator " + character.getName() + " deployed as " + character.getRole().getDisplayName());
+        
         initializeStartingMissions();
+        applyDistrictModifications();
     }
     
     /**
@@ -92,16 +102,28 @@ public class GameSession {
         currentMission = null;
     }
     
-    // Getters y setters
+    // Accessors
     public Character getCharacter() { return character; }
     public District getDistrict() { return district; }
     public Mission getCurrentMission() { return currentMission; }
     public GameLog getGameLog() { return gameLog; }
     public WorldState getWorldState() { return worldState; }
+    public RunMemory getRunMemory() { return runMemory; }
+    public DistrictModifier getDistrictModifier() { return districtModifier; }
+    
     public void setCurrentMission(Mission mission) { this.currentMission = mission; }
     
     public boolean hasActiveSession() {
         return character != null && district != null;
+    }
+    
+    /**
+     * Aplica modificaciones del distrito según el estado del mundo.
+     */
+    public void applyDistrictModifications() {
+        if (districtModifier != null) {
+            districtModifier.applyModifications();
+        }
     }
 
     public void registerMissionCompleted(String missionId) {
