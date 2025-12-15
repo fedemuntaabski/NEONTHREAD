@@ -1,0 +1,48 @@
+[
+  {
+    "id": "mission_01",
+    "title": "Primera Conexión",
+    "description": "Una figura encapuchada te contacta en la esquina. Dice tener información sobre la megacorp que controla el sector.",
+    "rewardCredits": 500,
+    "rewardInfo": "Datos encriptados",
+    "type": "MAIN",
+    "priority": "HIGH",
+    "urgency": "NORMAL",
+    "difficulty": 1,
+    "consequences": {
+      "flagsToSet": ["intro_completed"]
+    }
+  },
+  {
+    "id": "mission_02",
+    "title": "El Paquete Perdido",
+    "description": "Un mensajero ha perdido un paquete importante en el sector bajo. Recupéralo antes que los carroñeros.",
+    "rewardCredits": 300,
+    "rewardInfo": "Reputación callejera",
+    "type": "SIDE",
+    "priority": "NORMAL",
+    "urgency": "NORMAL",
+    "difficulty": 2,
+    "requirements": ["mission_01"],
+    "spawnConditions": {
+      "minReputation": 0
+    },
+    "consequences": {
+      "reputationDelta": 10,
+      "narrativeItems": ["item_encrypted_chip"]
+    }
+  },
+  {
+    "id": "mission_03",
+    "title": "Sabotaje Corporativo",
+    "description": "Infiltrate en la subestación de energía y corta el suministro al distrito comercial.",
+    "rewardCredits": 1000,
+    "type": "COMBAT",
+    "priority": "HIGH",
+    "requirements": ["mission_02"],
+    "consequences": {
+      "districtChange": "LOCKDOWN",
+      "reputationDelta": 50
+    }
+  }
+]

@@ -3,63 +3,84 @@ package com.neonthread.ui;
 import com.neonthread.GameConstants;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 /**
- * ComboBox/Dropdown personalizado con estética cyberpunk siguiendo DRY.
+ * ComboBox con estética cyberpunk.
+ * Refactorizado para eliminar código duplicado y mejorar legibilidad.
  */
 public class CyberpunkComboBox<T> extends JComboBox<T> {
     
     public CyberpunkComboBox(T[] items) {
         super(items);
-        customizeUI();
+        initializeStyles();
+        setupRenderer();
+        setupPopupStyling();
     }
     
-    private void customizeUI() {
+    private void initializeStyles() {
         setBackground(GameConstants.COLOR_BACKGROUND);
         setForeground(GameConstants.COLOR_TEXT_PRIMARY);
         setFont(GameConstants.FONT_TEXT);
-        setBorder(new LineBorder(GameConstants.COLOR_CYAN_NEON, 2));
+        setBorder(BorderFactory.createLineBorder(GameConstants.COLOR_CYAN_NEON, 1));
         setFocusable(false);
-        
-        // Set background for the editor component
-        if (getEditor() != null && getEditor().getEditorComponent() instanceof JTextField) {
-            JTextField editor = (JTextField) getEditor().getEditorComponent();
-            editor.setBackground(GameConstants.COLOR_BACKGROUND);
-            editor.setForeground(GameConstants.COLOR_TEXT_PRIMARY);
-            editor.setOpaque(true);
-        }
-        
-        // Renderer personalizado
+        setMaximumSize(new Dimension(250, 35));
+        setPreferredSize(new Dimension(200, 30));
+    }
+    
+    private void setupRenderer() {
         setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, 
                     int index, boolean isSelected, boolean cellHasFocus) {
-                JLabel label = (JLabel) super.getListCellRendererComponent(
-                    list, value, index, isSelected, cellHasFocus);
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 
-                label.setBackground(GameConstants.COLOR_BACKGROUND);
-                label.setForeground(isSelected ? GameConstants.COLOR_CYAN_NEON : GameConstants.COLOR_TEXT_PRIMARY);
-                label.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+                setFont(GameConstants.FONT_TEXT);
+                setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
                 
-                return label;
+                if (list == null) {
+                    setBackground(GameConstants.COLOR_BACKGROUND);
+                    setForeground(Color.BLACK);
+                } else {
+                    setBackground(isSelected ? GameConstants.COLOR_CYAN_NEON.darker() : GameConstants.COLOR_BACKGROUND);
+                    setForeground(isSelected ? GameConstants.COLOR_BACKGROUND : GameConstants.COLOR_TEXT_PRIMARY);
+                }
+                
+                return this;
             }
         });
-        
-        // Hover effect
-        addMouseListener(new MouseAdapter() {
+    }
+    
+    private void setupPopupStyling() {
+        addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
             @Override
-            public void mouseEntered(MouseEvent e) {
-                setBorder(new LineBorder(GameConstants.COLOR_BUTTON_HOVER, 2));
+            public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent e) {
+                SwingUtilities.invokeLater(() -> applyPopupStyles());
             }
             
             @Override
-            public void mouseExited(MouseEvent e) {
-                setBorder(new LineBorder(GameConstants.COLOR_CYAN_NEON, 2));
-            }
+            public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent e) {}
+            
+            @Override
+            public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) {}
         });
+    }
+    
+    private void applyPopupStyles() {
+        Object popup = getUI().getAccessibleChild(this, 0);
+        if (popup instanceof JPopupMenu) {
+            JPopupMenu menu = (JPopupMenu) popup;
+            menu.setBackground(GameConstants.COLOR_BACKGROUND);
+            menu.setBorder(BorderFactory.createLineBorder(GameConstants.COLOR_CYAN_NEON, 1));
+            
+            for (Component comp : menu.getComponents()) {
+                if (comp instanceof JScrollPane) {
+                    JScrollPane scroll = (JScrollPane) comp;
+                    scroll.getViewport().getView().setBackground(GameConstants.COLOR_BACKGROUND);
+                    scroll.setBackground(GameConstants.COLOR_BACKGROUND);
+                    scroll.setBorder(BorderFactory.createLineBorder(GameConstants.COLOR_CYAN_NEON, 1));
+                }
+            }
+        }
     }
 }

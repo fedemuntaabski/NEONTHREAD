@@ -1,0 +1,50 @@
+[
+  {
+    "id": "scene_01",
+    "title": "Callejón Oscuro",
+    "text": "La lluvia ácida golpea el pavimento. El contacto debería estar aquí, pero solo ves sombras moviéndose entre los contenedores de basura. Un zumbido eléctrico sugiere un dron de vigilancia cercano.",
+    "location": "Distrito Theta-5 - Sector Bajo",
+    "options": [
+      {
+        "text": "Hackear el dron para obtener visual",
+        "nextSceneId": "scene_success",
+        "checks": [
+          { "type": "HACK", "min": 2, "desc": "Hacking ≥ 2" }
+        ],
+        "consequences": [
+          { "type": "CHANGE_REPUTATION", "key": "", "value": 1 }
+        ]
+      },
+      {
+        "text": "Buscar trampas en el área antes de avanzar",
+        "nextSceneId": "scene_success",
+        "checks": [
+          { "type": "PERCEPTION", "min": 3, "desc": "Percepción ≥ 3" }
+        ],
+        "consequences": [
+          { "type": "CHANGE_BATTERY", "key": "", "value": -10 }
+        ]
+      },
+      {
+        "text": "Retirarse y reportar al contacto",
+        "nextSceneId": "scene_success",
+        "consequences": [
+          { "type": "CHANGE_CREDITS", "key": "", "value": 50 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "scene_success",
+    "title": "Misión Cumplida",
+    "text": "Has logrado superar el obstáculo. El camino está despejado.",
+    "location": "Distrito Theta-5",
+    "isEnd": true,
+    "options": [
+        {
+            "text": "Continuar",
+            "nextSceneId": null
+        }
+    ]
+  }
+]

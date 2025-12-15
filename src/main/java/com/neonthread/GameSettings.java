@@ -15,6 +15,10 @@ public class GameSettings {
     private boolean fullscreen = false;
     private int masterVolume = 70; // 0-100
     private boolean largeText = false; // false = Normal, true = Grande
+
+    // Extensibilidad (KISS): localización y tema
+    private String language = "en"; // en|es
+    private String theme = "CYAN"; // CYAN|PURPLE
     
     private GameSettings() {
         loadSettings();
@@ -32,6 +36,9 @@ public class GameSettings {
         fullscreen = false;
         masterVolume = 70;
         largeText = false;
+
+        language = "en";
+        theme = "CYAN";
     }
     
     // Getters y Setters
@@ -48,6 +55,20 @@ public class GameSettings {
     
     public boolean isLargeText() { return largeText; }
     public void setLargeText(boolean largeText) { this.largeText = largeText; }
+
+    public String getLanguage() { return language; }
+    public void setLanguage(String language) {
+        if (language == null) return;
+        String normalized = language.trim().toLowerCase();
+        this.language = normalized.equals("es") ? "es" : "en";
+    }
+
+    public String getTheme() { return theme; }
+    public void setTheme(String theme) {
+        if (theme == null) return;
+        String normalized = theme.trim().toUpperCase();
+        this.theme = normalized.equals("PURPLE") ? "PURPLE" : "CYAN";
+    }
     
     // Persistencia simple (KISS)
     public void saveSettings() {
@@ -56,6 +77,8 @@ public class GameSettings {
             writer.println("fullscreen=" + fullscreen);
             writer.println("masterVolume=" + masterVolume);
             writer.println("largeText=" + largeText);
+            writer.println("language=" + language);
+            writer.println("theme=" + theme);
         } catch (IOException e) {
             System.err.println("Error al guardar configuración: " + e.getMessage());
         }
@@ -86,6 +109,12 @@ public class GameSettings {
                         break;
                     case "largeText":
                         largeText = Boolean.parseBoolean(value);
+                        break;
+                    case "language":
+                        setLanguage(value);
+                        break;
+                    case "theme":
+                        setTheme(value);
                         break;
                 }
             }

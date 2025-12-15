@@ -1,109 +1,47 @@
 package com.neonthread;
 
-import javax.swing.*;
-import java.awt.*;
+import com.neonthread.settings.GameSettings;
+import com.neonthread.settings.SettingsListener;
+import com.neonthread.settings.appliers.*;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
-/**
- * Aplica configuraciones simples del juego (KISS).
- * Solo maneja resolución, pantalla completa, volumen y tamaño de texto.
- */
-public class SettingsApplier {
+public class SettingsApplier implements SettingsListener {
+    private final VideoSettingsApplier videoApplier;
+    private final AudioSettingsApplier audioApplier;
+    private final AccessibilitySettingsApplier accessibilityApplier;
+    private final LocalizationSettingsApplier localizationApplier;
+    private final ThemeSettingsApplier themeApplier;
     private final JFrame window;
-    private final GameSettings settings;
-    
+
     public SettingsApplier(JFrame window) {
         this.window = window;
-        this.settings = GameSettings.getInstance();
+        this.videoApplier = new VideoSettingsApplier(window);
+        this.audioApplier = new AudioSettingsApplier();
+        this.accessibilityApplier = new AccessibilitySettingsApplier();
+        this.localizationApplier = new LocalizationSettingsApplier();
+        this.themeApplier = new ThemeSettingsApplier();
+        
+        // Register as listener
+        GameSettings.getInstance().addListener(this);
     }
-    
-    /**
-     * Aplica todas las configuraciones.
-     */
+
     public void applyAll() {
-        applyResolution();
-        applyFullscreen();
-        applyVolume();
-        applyTextSize();
-    }
-    
-    /**
-     * Aplica la resolución (solo en modo ventana).
-     */
-    private void applyResolution() {
-        if (settings.isFullscreen()) {
-            return; // En fullscreen se usa resolución nativa
-        }
+        GameSettings settings = GameSettings.getInstance();
         
-        String resolution = settings.getResolution();
-        String[] parts = resolution.split("x");
+        // Order matters: Localization -> Theme -> Accessibility -> Video -> Audio
+        localizationApplier.apply(settings.localization);
+        themeApplier.apply(settings.gameplay);
+        accessibilityApplier.apply(settings.accessibility);
+        videoApplier.apply(settings.video);
+        audioApplier.apply(settings.audio);
         
-        if (parts.length == 2) {
-            try {
-                int width = Integer.parseInt(parts[0]);
-                int height = Integer.parseInt(parts[1]);
-                window.setSize(width, height);
-                window.setLocationRelativeTo(null);
-            } catch (NumberFormatException e) {
-                System.err.println("Resolución inválida: " + resolution);
-            }
-        }
-    }
-    
-    /**
-     * Aplica modo pantalla completa o ventana.
-     */
-    private void applyFullscreen() {
-        GraphicsDevice device = GraphicsEnvironment
-            .getLocalGraphicsEnvironment()
-            .getDefaultScreenDevice();
-        
-        if (settings.isFullscreen()) {
-            // Activar pantalla completa
-            window.dispose();
-            window.setUndecorated(true);
-            window.setVisible(true);
-            
-            if (device.isFullScreenSupported()) {
-                device.setFullScreenWindow(window);
-            }
-        } else {
-            // Modo ventana
-            if (device.getFullScreenWindow() == window) {
-                device.setFullScreenWindow(null);
-            }
-            
-            window.dispose();
-            window.setUndecorated(false);
-            window.setVisible(true);
-            applyResolution();
-        }
-    }
-    
-    /**
-     * Aplica el volumen maestro.
-     */
-    private void applyVolume() {
-        int volume = settings.getMasterVolume();
-        // En un juego real aquí se aplicaría al sistema de audio
-        System.out.println("Volumen maestro: " + volume + "%");
-    }
-    
-    /**
-     * Aplica el tamaño de texto.
-     */
-    private void applyTextSize() {
-        int baseSize = settings.isLargeText() ? 18 : 14;
-        
-        Font textFont = new Font(GameConstants.FONT_FAMILY, Font.PLAIN, baseSize);
-        Font buttonFont = new Font(GameConstants.FONT_FAMILY, Font.BOLD, baseSize + 4);
-        
-        UIManager.put("Label.font", textFont);
-        UIManager.put("Button.font", buttonFont);
-        UIManager.put("RadioButton.font", textFont);
-        UIManager.put("CheckBox.font", textFont);
-        
+        // Refresh UI to show changes immediately
         SwingUtilities.updateComponentTreeUI(window);
-        window.revalidate();
-        window.repaint();
+    }
+
+    @Override
+    public void onSettingsChanged(GameSettings settings) {
+        applyAll();
     }
 }

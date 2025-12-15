@@ -4,15 +4,23 @@ Un juego minimalista estilo Cyberpunk 2077 desarrollado en Java con Swing.
 
 ## 🎨 Descripción
 
-NEONTHREAD es un juego de texto futurista que combina la estética cyberpunk con una interfaz minimalista. Sin imágenes, solo texto, paneles y efectos de neón simulados.
+NEONTHREAD es un juego RPG cyberpunk desarrollado en Java con Swing, que combina narrativa interactiva con gestión de misiones, inventario y progresión de personaje. Con una estética minimalista neón y un sistema de estados robusto.
 
-### Características
+### Características Principales
 
 - 🖥️ **Secuencia de arranque cinematográfica** con efectos [NO SIGNAL] y flash
 - ⚡ **Boot log tipo BIOS futurista** con glitches y warnings
 - 🎯 **Logo corporativo ASCII** con efectos de corrupción visual
 - 🌌 **Menú holográfico** con borde cian y efectos de interferencia
-- 🔄 **Sistema de estados** limpio y mantenible (5 estados)
+- 🗺️ **Sistema de mapa de distrito** interactivo con misiones y locaciones
+- 📖 **Narrativa ramificada** con sistema de nodos y consecuencias
+- 🎭 **Creación de personaje** con roles (Netrunner, Solo, Techie, Fixer, Corpo)
+- 📦 **Sistema de inventario** con ítems, modificadores y upgrades
+- 🎯 **Sistema de misiones** completo con requisitos, recompensas y condiciones
+- ⚙️ **Configuración completa** (Video, Audio, Gameplay, Controles, Accesibilidad)
+- 🌍 **Sistema de localización** (i18n) con soporte multiidioma
+- 📊 **Estadísticas y progresión** con atributos base y capacidades derivadas
+- 🔄 **Patrón MVP** para separación de lógica y presentación
 - ✨ **Efectos visuales avanzados** (typewriter, glitch, fade-in, scanlines)
 - 🎨 **Paleta cyberpunk mejorada** con colores neón vibrantes
 
@@ -30,7 +38,10 @@ NEONTHREAD es un juego de texto futurista que combina la estética cyberpunk con
 cd NEONTHREAD
 
 # Compilar todos los archivos Java
-javac -d bin src/main/java/com/neonthread/*.java src/main/java/com/neonthread/screens/*.java
+javac -cp . -d bin (Get-ChildItem -Recurse src/main/java -Filter *.java).FullName
+
+# O en Linux/Mac:
+find src/main/java -name "*.java" | xargs javac -d bin
 
 # Ejecutar el juego
 java -cp bin com.neonthread.NeonThreadGame
@@ -47,10 +58,21 @@ mvn exec:java -Dexec.mainClass="com.neonthread.NeonThreadGame"
 
 ## 🎮 Controles
 
-- **↑/↓** - Navegar por menús y tabs de settings
-- **1-4** o **Enter** - Seleccionar opción
-- **ESC** - Cancelar o salir de settings
-- **Click** - Interactuar con sliders, toggles y botones
+### Generales
+- **↑/↓/←/→** - Navegar por menús, opciones y mapa
+- **1-9** o **Enter** - Seleccionar opción/misión
+- **ESC** - Pausa / Salir de settings
+- **Click** - Interactuar con UI, botones, sliders
+
+### Mapa de Distrito
+- **I** - Abrir inventario
+- **M** - Seleccionar misión más cercana al cursor
+- **Click en misión** - Ver detalles de misión
+- **Scroll/Drag** - Navegar por el mapa
+
+### Narrativa
+- **Click** - Saltar efecto typewriter
+- **Botones de opción** - Elegir acciones (con checks de atributos)
 
 NEONTHREAD incluye un sistema de configuración completo y funcional con 5 categorías:
 
@@ -107,37 +129,99 @@ NEONTHREAD incluye un sistema de configuración completo y funcional con 5 categ
 
 ```
 NEONTHREAD/
-├── src/
-│   └── main/
-│       └── java/
-│           └── com/
-│               └── neonthread/
-│                   ├── NeonThreadGame.java      # Clase principal + state manager
-│                   ├── GameState.java           # 5 estados del juego
-                   ├── GameConstants.java       # Constantes centralizadas
-                   ├── TypewriterEffect.java    # Efecto typewriter (DRY)
-                   ├── BlinkingCursor.java      # Cursor parpadeante (DRY)
-                   ├── GlitchEffect.java        # Efectos de glitch (DRY)
-                   ├── GameSettings.java        # Singleton de configuración
-                   ├── SettingsApplier.java     # Aplica settings al juego
-                   ├── ui/
-                   │   ├── CyberpunkSlider.java    # Slider personalizado
-                   │   ├── CyberpunkToggle.java    # Toggle switch
-                   │   ├── CyberpunkComboBox.java  # Dropdown
-                   │   └── CyberpunkButton.java    # Botón con hover
-                   └── screens/
-                       ├── BootstrapScreen.java # [NO SIGNAL] + flash
-                       ├── BootScreen.java      # Boot log BIOS
-                       ├── LogoScreen.java      # Logo glitcheado
-                       ├── TitleScreen.java     # Título + tagline
-                       ├── MenuScreen.java      # Menú holográfico
-                       ├── SettingsScreen.java  # Panel de settings
-                       └── settings/
-                           ├── VideoSettingsPanel.java
-                           ├── AudioSettingsPanel.java
-                           ├── GameplaySettingsPanel.java
-                           ├── ControlsSettingsPanel.java
-                           └── AccessibilitySettingsPanel.java
+├── src/main/java/com/neonthread/
+│   ├── NeonThreadGame.java           # Clase principal + state manager
+│   ├── GameState.java                # Estados del juego (14 estados)
+│   ├── GameConstants.java            # Constantes y paleta de colores
+│   ├── GameSession.java              # Singleton de sesión de juego
+│   ├── GameSettings.java             # Configuración global
+│   ├── Character.java                # Personaje del jugador
+│   ├── Mission.java                  # Modelo de misión
+│   ├── MissionBuilder.java           # Builder pattern para misiones
+│   ├── NarrativeScene.java           # Escenas narrativas con nodos
+│   ├── District.java                 # Distrito del juego
+│   ├── WorldState.java               # Estado del mundo
+│   ├── TypewriterEffect.java         # Efecto typewriter (DRY)
+│   ├── BlinkingCursor.java           # Cursor parpadeante (DRY)
+│   ├── GlitchEffect.java             # Efectos glitch (DRY)
+│   │
+│   ├── screens/                      # Pantallas del juego
+│   │   ├── BootstrapScreen.java      # [NO SIGNAL] + flash
+│   │   ├── BootScreen.java           # Boot log BIOS
+│   │   ├── LogoScreen.java           # Logo glitcheado
+│   │   ├── MenuScreen.java           # Menú principal
+│   │   ├── SettingsScreen.java       # Configuración
+│   │   ├── CharacterCreationScreen.java  # Creación de personaje
+│   │   ├── IntroNarrativeScreen.java     # Narrativa de intro
+│   │   ├── DistrictMapScreen.java        # HUB principal con mapa
+│   │   ├── MissionWindowScreen.java      # Ventana de misión (MVP)
+│   │   ├── MissionWindowPresenter.java   # Presenter (MVP pattern)
+│   │   ├── NarrativeSceneScreen.java     # Escenas narrativas interactivas
+│   │   ├── InventoryScreen.java          # Gestión de inventario
+│   │   ├── ResultScreen.java             # Resultados post-misión
+│   │   ├── LoadingRunScreen.java         # Pantalla de carga
+│   │   ├── PauseScreen.java              # Menú de pausa
+│   │   └── ShopScreen.java               # Tienda de upgrades
+│   │
+│   ├── ui/                           # Componentes UI reutilizables
+│   │   ├── CyberpunkButton.java      # Botón personalizado
+│   │   ├── CyberpunkSlider.java      # Slider con estilo cyberpunk
+│   │   ├── CyberpunkComboBox.java    # Dropdown personalizado
+│   │   ├── MissionBadge.java         # Badge para misiones (Builder)
+│   │   ├── MissionSection.java       # Sección reutilizable
+│   │   └── MissionCard.java          # Card modal
+│   │
+│   ├── inventory/                    # Sistema de inventario
+│   │   ├── Inventory.java            # Inventario del jugador
+│   │   ├── InventoryItem.java        # Ítems del juego
+│   │   ├── ItemRegistry.java         # Registro de ítems (Factory)
+│   │   ├── Upgrade.java              # Upgrades del personaje
+│   │   └── UpgradeManager.java       # Gestor de upgrades
+│   │
+│   ├── stats/                        # Sistema de estadísticas
+│   │   ├── BaseAttributes.java       # Atributos base
+│   │   ├── DerivedCapabilities.java  # Capacidades derivadas
+│   │   ├── RuntimeStats.java         # Stats en runtime
+│   │   ├── StatType.java             # Tipos de estadísticas
+│   │   ├── Modifier.java             # Modificadores de stats
+│   │   └── StatEffectApplier.java    # Aplicador de efectos
+│   │
+│   ├── settings/                     # Sistema de configuración
+│   │   ├── VideoSettings.java
+│   │   ├── AudioSettings.java
+│   │   ├── GameplaySettings.java
+│   │   ├── LocalizationSettings.java
+│   │   ├── AccessibilitySettings.java
+│   │   └── appliers/                 # Strategy pattern
+│   │       ├── VideoSettingsApplier.java
+│   │       ├── AudioSettingsApplier.java
+│   │       └── ...
+│   │
+│   ├── loaders/                      # Cargadores de datos
+│   │   ├── MissionLoader.java        # Carga misiones desde JSON
+│   │   └── SceneLoader.java          # Carga escenas desde JSON
+│   │
+│   ├── localization/                 # Sistema i18n
+│   │   └── Localization.java         # Gestor de traducciones
+│   │
+│   ├── map/                          # Sistema de mapa
+│   │   ├── MapConfig.java
+│   │   └── MapConfigLoader.java
+│   │
+│   └── utils/                        # Utilidades
+│       └── SimpleJsonParser.java     # Parser JSON ligero
+│
+├── config/                           # Archivos de configuración
+│   ├── missions.json                 # Definiciones de misiones
+│   ├── scenes.json                   # Escenas narrativas
+│   ├── map.json                      # Configuración del mapa
+│   ├── settings.properties           # Settings guardados
+│   ├── lang/
+│   │   ├── lang_en.properties        # Textos en inglés
+│   │   └── lang_es.properties        # Textos en español
+│   └── themes/                       # Temas visuales
+│
+├── bin/                              # Archivos compilados (.class)
 ├── .gitignore
 └── README.md
 ```
@@ -187,19 +271,66 @@ Mensajes aleatorios de interferencia de señal
 
 ## 🔮 Estado Actual
 
-✅ Secuencia bootstrap con fade y flash  
-✅ Boot log tipo BIOS con glitches  
-✅ Logo corporativo con efecto glitch  
-✅ Pantalla de título mejorada  
-✅ Menú holográfico con efectos  
-✅ Sistema de información de NightCity  
-✅ Efectos visuales avanzados  
-✅ **Sistema de Settings completo y funcional**  
-✅ **Configuraciones aplicables en tiempo real**  
-✅ **Componentes UI personalizados reutilizables**  
-⏳ Lógica de juego (próximamente)  
-⏳ Sistema de guardado persistente (próximamente)  
-⏳ Audio engine (próximamente)
+### ✅ Completado
+
+**Core Systems**
+- ✅ Arquitectura de estados completa (14 estados)
+- ✅ Sistema de sesión de juego (GameSession singleton)
+- ✅ Sistema de configuración global (GameSettings)
+- ✅ Gestión de estado del mundo (WorldState)
+
+**Pantallas y UI**
+- ✅ Secuencia bootstrap con fade y flash
+- ✅ Boot log tipo BIOS con glitches
+- ✅ Logo corporativo con efecto glitch
+- ✅ Menú principal holográfico
+- ✅ Sistema de Settings completo (5 categorías)
+- ✅ Creación de personaje con roles
+- ✅ Mapa de distrito interactivo (HUB principal)
+- ✅ Sistema de misiones con ventana de detalles (MVP pattern)
+- ✅ Narrativa interactiva con sistema de nodos
+- ✅ Inventario con ítems y modificadores
+- ✅ Pantalla de resultados post-misión
+- ✅ Pantalla de pausa
+- ✅ Tienda de upgrades
+
+**Sistemas de Juego**
+- ✅ Sistema de personaje con stats (base + derivados)
+- ✅ Sistema de progresión (level, XP, karma, notoriedad)
+- ✅ Sistema de misiones completo (requisitos, spawn conditions)
+- ✅ Sistema de narrativa ramificada (checks de atributos)
+- ✅ Sistema de inventario (ítems, upgrades, modificadores)
+- ✅ Sistema de consecuencias (flags, credits, items)
+- ✅ GameLog para seguimiento de eventos
+
+**Patterns y Arquitectura**
+- ✅ MVP Pattern (MissionWindowPresenter)
+- ✅ Builder Pattern (MissionBuilder, UI components)
+- ✅ Factory Pattern (ItemRegistry)
+- ✅ Strategy Pattern (SettingsAppliers, ThemeEngine)
+- ✅ Singleton Pattern (GameSession, GameSettings)
+- ✅ Observer Pattern (GameSettings listeners)
+- ✅ State Pattern (BootstrapScreen, NarrativeSceneScreen)
+
+**Data y Localización**
+- ✅ Cargador de misiones desde JSON
+- ✅ Cargador de escenas desde JSON
+- ✅ Sistema i18n con soporte multiidioma
+- ✅ Parser JSON ligero sin dependencias
+
+**Componentes UI Reutilizables**
+- ✅ CyberpunkButton, Slider, ComboBox
+- ✅ MissionBadge, MissionSection, MissionCard
+- ✅ Efectos: Typewriter, Glitch, BlinkingCursor
+
+### ⏳ Pendiente
+
+- ⏳ Sistema de guardado persistente
+- ⏳ Audio engine y efectos de sonido
+- ⏳ Más misiones y contenido narrativo
+- ⏳ Sistema de combate (si aplica)
+- ⏳ Más locaciones en el mapa
+- ⏳ Animaciones avanzadas
 
 ## 📝 Licencia
 

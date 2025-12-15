@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 
 /**
  * Pantalla de arranque con efecto terminal.
+ * Usa Template Method pattern para secuencia de boot.
  */
 public class BootScreen extends JPanel {
     private final Consumer<GameState> onComplete;

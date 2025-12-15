@@ -1,0 +1,9 @@
+{
+  "theme": "CYAN",
+  "locations": {
+    "apartment": { "x": 380, "y": 320 },
+    "black_market": { "x": 720, "y": 360 },
+    "network_node": { "x": 640, "y": 520 },
+    "street_corner": { "x": 520, "y": 460 }
+  }
+}
