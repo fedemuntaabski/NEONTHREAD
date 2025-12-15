@@ -92,35 +92,31 @@ public class IntroNarrativeScreen extends JPanel {
     
     /**
      * Genera el texto narrativo completo (DRY).
+     * FASE 2 Feature 7: Usa IntroLoader para variantes según rol y dificultad.
      */
     private String buildNarrativeText() {
         GameSession session = GameSession.getInstance();
-        String name = "Operator";
-        String roleDesc = "city operator";
         
-        if (session.hasActiveSession()) {
-            name = session.getCharacter().getName();
-            roleDesc = session.getCharacter().getRole().getDescription().toLowerCase();
+        if (session.hasActiveSession() && session.getCharacter() != null) {
+            com.neonthread.Character character = session.getCharacter();
+            return com.neonthread.loaders.IntroLoader.loadIntroForCharacter(
+                character, 
+                character.getDifficulty()
+            );
         }
         
+        // Fallback genérico
         return "> Initializing access protocols...\n" +
-               "> Authenticating operator: " + name.toUpperCase() + "\n" +
+               "> Authenticating operator...\n" +
                "> Synchronizing neural implants...\n" +
                "> Loading environment: District Theta-5...\n\n" +
-               "─".repeat(60) + "\n\n" +
+               "────────────────────────────────────────────────────────────\n\n" +
                "The megacity of NEONFALL never sleeps.\n\n" +
-               "Its skyscrapers hide encrypted data networks, old corporate wars\n" +
-               "and alleys where life is worth less than a byte.\n\n" +
-               "The year is 2087. The city no longer has a name.\n" +
+               "The year is 2087. The city has no name.\n" +
                "Only corporate codes and numbered sectors.\n\n" +
-               "One megacorporation controls everything: water, electricity, information.\n\n" +
-               "You are " + name + ", " + roleDesc + ".\n\n" +
-               "You live in the shadows of District Theta-5, where corporate law doesn't reach.\n\n" +
-               "This is your first 'run'. Your first chance to change the rules.\n" +
-               "Or to disappear trying.\n\n" +
-               "─".repeat(60) + "\n\n" +
+               "This is your first run.\n\n" +
+               "────────────────────────────────────────────────────────────\n\n" +
                "> MISSION 01 UNLOCKED: First Contact\n" +
-               "> Available location: District Theta-5\n" +
                "> System status: OPERATIONAL\n\n" +
                "Initiation protocol complete. Welcome to the network.";
     }

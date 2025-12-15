@@ -225,7 +225,8 @@ public class Character {
     public enum Difficulty {
         EASY("Fácil", "Narrativa relajada", 0.7, -10, 0.85),
         NORMAL("Normal", "Equilibrio entre narrativa y desafío", 1.0, 0, 1.0),
-        HARD("Difícil", "Cada decisión cuenta", 1.25, 12, 1.15);
+        HARD("Difícil", "Cada decisión cuenta", 1.25, 12, 1.15),
+        BRUTAL("Brutal", "Permadeath. Sin piedad.", 1.75, 25, 1.40);
         
         private final String displayName;
         private final String description;
