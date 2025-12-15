@@ -12,8 +12,8 @@ import java.awt.*;
 import java.util.function.Consumer;
 
 /**
- * Pantalla de creación de personaje mejorada (KISS + DRY).
- * Formulario minimalista con atributos dinámicos por rol.
+ * Pantalla de creación de personaje.
+ * Usa Strategy pattern en selección de roles y Builder pattern en construcción de UI.
  */
 public class CharacterCreationScreen extends JPanel {
     private final Consumer<GameState> onComplete;

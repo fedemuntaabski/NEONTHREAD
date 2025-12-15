@@ -324,10 +324,6 @@ public class Mission {
                 if (character.getReputation() < minReputation || character.getReputation() > maxReputation) return false;
                 if (character.getNotoriety() < minNotoriety || character.getNotoriety() > maxNotoriety) return false;
                 if (character.getKarma() < minKarma || character.getKarma() > maxKarma) return false;
-            } else {
-                // Fallback to WorldState for reputation if character is null (legacy)
-                int rep = worldState.getReputation();
-                if (rep < minReputation || rep > maxReputation) return false;
             }
             
             // Verificar flags requeridos

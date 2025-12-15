@@ -3,6 +3,10 @@ package com.neonthread.inventory;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Registro de items del juego.
+ * Usa Singleton pattern (implícito con static) y Factory pattern para creación.
+ */
 public class ItemRegistry {
     private static final Map<String, InventoryItem> items = new HashMap<>();
 

@@ -10,8 +10,8 @@ import java.awt.*;
 import java.util.function.Consumer;
 
 /**
- * Pantalla de pausa (KISS).
- * Accesible con ESC en cualquier momento durante el juego.
+ * Pantalla de pausa con opciones de navegación.
+ * Usa Builder pattern implícito en construcción de UI.
  */
 public class PauseScreen extends JPanel {
     private final Consumer<GameState> onStateChange;

@@ -1,9 +1,9 @@
 package com.neonthread.screens;
 
 import com.neonthread.GameConstants;
-import com.neonthread.settings.GameSettings;
 import com.neonthread.SettingsApplier;
 import com.neonthread.localization.Localization;
+import com.neonthread.settings.GameSettings;
 import com.neonthread.ui.CyberpunkButton;
 import com.neonthread.ui.CyberpunkComboBox;
 import com.neonthread.ui.CyberpunkSlider;
@@ -12,6 +12,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
 
+/**
+ * Pantalla de configuración del juego.
+ * Usa Observer pattern con GameSettings para aplicar cambios.
+ */
 public class SettingsScreen extends JPanel {
     private Consumer<Void> onBack;
     private final GameSettings settings;

@@ -12,8 +12,7 @@ import java.util.Map;
 
 public class MissionLoader {
     private static final String MISSIONS_FILE = "config/missions.json";
-
-    public static List<Mission> loadMissions() {
+    @SuppressWarnings("unchecked")    public static List<Mission> loadMissions() {
         List<Mission> missions = new ArrayList<>();
         File file = new File(MISSIONS_FILE);
         if (!file.exists()) {
@@ -44,6 +43,7 @@ public class MissionLoader {
         return missions;
     }
 
+    @SuppressWarnings("unchecked")
     private static Mission parseMission(Map<String, Object> data) {
         String id = (String) data.get("id");
         if (id == null) throw new IllegalArgumentException("Mission ID is missing");

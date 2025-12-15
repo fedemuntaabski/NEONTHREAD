@@ -3,15 +3,16 @@ package com.neonthread.utils;
 import java.util.*;
 
 /**
- * A simple JSON parser to avoid external dependencies.
- * Supports Objects {}, Arrays [], Strings "", Numbers, Booleans, and Null.
+ * Parser JSON ligero sin dependencias externas.
+ * Soporta Objects {}, Arrays [], Strings "", Numbers, Booleans y Null.
+ * Usa Recursive Descent parsing pattern.
  */
 public class SimpleJsonParser {
 
     private final String json;
     private int index;
 
-    public SimpleJsonParser(String json) {
+    private SimpleJsonParser(String json) {
         this.json = json;
         this.index = 0;
     }
@@ -112,22 +113,23 @@ public class SimpleJsonParser {
     private Number parseNumber() {
         int start = index;
         if (peek() == '-') index++;
-        while (index < json.length() && (Character.isDigit(json.charAt(index)) || json.charAt(index) == '.')) {
+        while (index < json.length()) {
+            char c = json.charAt(index);
+            if (!Character.isDigit(c) && c != '.') break;
             index++;
         }
         String numStr = json.substring(start, index);
-        if (numStr.contains(".")) return Double.parseDouble(numStr);
-        return Integer.parseInt(numStr);
+        return numStr.contains(".") ? Double.parseDouble(numStr) : Integer.parseInt(numStr);
     }
 
     private Boolean parseTrue() {
         consume("true");
-        return true;
+        return Boolean.TRUE;
     }
 
     private Boolean parseFalse() {
         consume("false");
-        return false;
+        return Boolean.FALSE;
     }
 
     private Object parseNull() {

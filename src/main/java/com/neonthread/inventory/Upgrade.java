@@ -1,5 +1,9 @@
 package com.neonthread.inventory;
 
+/**
+ * Representa una mejora comprable para el personaje.
+ * Immutable excepto estado purchased (Value Object pattern parcial).
+ */
 public class Upgrade {
     private String id;
     private String name;

@@ -1,6 +1,12 @@
 package com.neonthread.screens;
 
-import com.neonthread.*;
+import com.neonthread.District;
+import com.neonthread.GameConstants;
+import com.neonthread.GameLog;
+import com.neonthread.GameSession;
+import com.neonthread.GameState;
+import com.neonthread.Mission;
+import com.neonthread.MissionHistory;
 import com.neonthread.ui.CyberpunkButton;
 
 import javax.swing.*;
@@ -8,8 +14,8 @@ import java.awt.*;
 import java.util.function.Consumer;
 
 /**
- * Pantalla de resultados completa (KISS + DRY).
- * Muestra resultado narrativo, recompensas, estadísticas y acciones.
+ * Pantalla de resultados post-misión.
+ * Usa Template Method pattern para construcción secuencial de secciones.
  */
 public class ResultScreen extends JPanel {
     private final Consumer<GameState> onStateChange;

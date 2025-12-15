@@ -11,8 +11,8 @@ import java.awt.*;
 import java.util.function.Consumer;
 
 /**
- * Pantalla de intro narrativa mejorada (KISS).
- * Estilo terminal/consola cyberpunk con texto progresivo.
+ * Pantalla de intro narrativa con texto progresivo.
+ * Usa Strategy pattern con TypewriterEffect para animaciones.
  */
 public class IntroNarrativeScreen extends JPanel {
     private final Consumer<GameState> onComplete;

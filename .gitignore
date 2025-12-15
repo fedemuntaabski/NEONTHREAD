@@ -83,3 +83,8 @@ $RECYCLE.BIN/
 .directory
 .Trash-*
 .nfs*
+
+# Project specific
+config/settings.properties
+*.log
+sources.txt

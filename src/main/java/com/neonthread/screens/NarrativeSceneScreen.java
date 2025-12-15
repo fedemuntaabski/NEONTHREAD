@@ -1,6 +1,12 @@
 package com.neonthread.screens;
 
-import com.neonthread.*;
+import com.neonthread.GameConstants;
+import com.neonthread.GameLog;
+import com.neonthread.GameSession;
+import com.neonthread.GameState;
+import com.neonthread.Mission;
+import com.neonthread.MissionHistory;
+import com.neonthread.NarrativeScene;
 import com.neonthread.NarrativeScene.*;
 import com.neonthread.stats.StatType;
 import com.neonthread.ui.CyberpunkButton;
@@ -14,8 +20,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * Escena narrativa interactiva completa (KISS + DRY).
- * Sistema de nodos con texto, opciones, checks y consecuencias.
+ * Escena narrativa interactiva con sistema de nodos.
+ * Usa State pattern para manejo de escenas y Observer pattern para efectos.
  */
 public class NarrativeSceneScreen extends JPanel {
     private final Consumer<GameState> onStateChange;

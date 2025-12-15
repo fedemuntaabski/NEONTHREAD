@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 
 /**
  * Pantalla inicial con efecto [NO SIGNAL] y fade-in.
+ * Usa State pattern para manejar transiciones visuales.
  */
 public class BootstrapScreen extends JPanel {
     private final Consumer<GameState> onComplete;
@@ -16,7 +17,6 @@ public class BootstrapScreen extends JPanel {
     private final JLabel connectingLabel;
     private float alpha = 0.0f;
     private Timer fadeTimer;
-    private boolean fadeComplete = false;
     
     public BootstrapScreen(Consumer<GameState> onComplete) {
         this.onComplete = onComplete;
@@ -44,7 +44,6 @@ public class BootstrapScreen extends JPanel {
     
     public void startSequence() {
         alpha = 0.0f;
-        fadeComplete = false;
         signalLabel.setVisible(true);
         connectingLabel.setVisible(false);
         
@@ -54,7 +53,6 @@ public class BootstrapScreen extends JPanel {
             if (alpha >= 1.0f) {
                 alpha = 1.0f;
                 fadeTimer.stop();
-                fadeComplete = true;
                 // Después del fade, esperar 600ms y mostrar "Attempting connection"
                 Timer waitTimer = new Timer(600, ev -> {
                     ((Timer)ev.getSource()).stop();

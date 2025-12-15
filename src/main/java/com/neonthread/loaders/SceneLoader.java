@@ -9,7 +9,6 @@ import com.neonthread.utils.SimpleJsonParser;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,7 @@ public class SceneLoader {
     private static final String SCENES_FILE = "config/scenes.json";
     private static Map<String, NarrativeScene> sceneCache = new HashMap<>();
 
+    @SuppressWarnings("unchecked")
     public static void loadScenes() {
         File file = new File(SCENES_FILE);
         if (!file.exists()) {
@@ -55,6 +55,7 @@ public class SceneLoader {
         return sceneCache.get(id);
     }
 
+    @SuppressWarnings("unchecked")
     private static NarrativeScene parseScene(Map<String, Object> data) {
         String id = (String) data.get("id");
         String title = (String) data.get("title");
@@ -76,6 +77,7 @@ public class SceneLoader {
         return scene;
     }
 
+    @SuppressWarnings("unchecked")
     private static SceneOption parseOption(Map<String, Object> data) {
         String text = (String) data.get("text");
         String nextSceneId = (String) data.get("nextSceneId");

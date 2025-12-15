@@ -1,9 +1,14 @@
 package com.neonthread.inventory;
 
 import com.neonthread.GameSession;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Gestiona upgrades disponibles y compras.
+ * Usa Strategy pattern para lógica de purchase.
+ */
 public class UpgradeManager {
     private List<Upgrade> upgrades;
 

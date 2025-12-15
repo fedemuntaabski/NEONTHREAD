@@ -1,16 +1,21 @@
 package com.neonthread.screens;
 
-import com.neonthread.*;
+import com.neonthread.GameConstants;
+import com.neonthread.GameSession;
 import com.neonthread.inventory.Upgrade;
 import com.neonthread.inventory.UpgradeManager;
-import com.neonthread.ui.CyberpunkButton;
 import com.neonthread.localization.Localization;
+import com.neonthread.ui.CyberpunkButton;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Pantalla de tienda para compra de upgrades.
+ * Usa Observer pattern para actualizar UI tras compras.
+ */
 public class ShopScreen extends JPanel {
     private final Consumer<Void> onBack;
     private final GameSession session;

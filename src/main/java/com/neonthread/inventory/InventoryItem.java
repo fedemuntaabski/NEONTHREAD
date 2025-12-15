@@ -1,9 +1,14 @@
 package com.neonthread.inventory;
 
 import com.neonthread.stats.Modifier;
-import java.util.List;
-import java.util.ArrayList;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Representa un item en el inventario.
+ * Encapsula propiedades y modificadores de stats.
+ */
 public class InventoryItem {
     private String id;
     private String name;

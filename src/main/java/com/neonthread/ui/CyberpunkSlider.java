@@ -7,23 +7,23 @@ import javax.swing.plaf.basic.BasicSliderUI;
 import java.awt.*;
 
 /**
- * Slider personalizado con estética cyberpunk siguiendo DRY.
+ * Slider personalizado con estética cyberpunk.
+ * UI personalizado usando Strategy pattern con BasicSliderUI.
  */
 public class CyberpunkSlider extends JSlider {
     
     public CyberpunkSlider(int min, int max, int value) {
         super(min, max, value);
-        customizeUI();
-    }
-    
-    private void customizeUI() {
         setUI(new CyberpunkSliderUI(this));
         setBackground(GameConstants.COLOR_BACKGROUND);
         setForeground(GameConstants.COLOR_CYAN_NEON);
         setFocusable(false);
-        setOpaque(false); // Eliminar fondo blanco por defecto
+        setOpaque(false);
     }
     
+    /**
+     * UI personalizado para el slider con renderizado cyberpunk.
+     */
     private static class CyberpunkSliderUI extends BasicSliderUI {
         
         public CyberpunkSliderUI(JSlider slider) {
@@ -39,13 +39,12 @@ public class CyberpunkSlider extends JSlider {
             int cy = (trackBounds.height / 2) - 2;
             int cw = trackBounds.width;
             
-            // Track background
+            // Track de fondo
             g2d.setColor(GameConstants.COLOR_PANEL);
             g2d.fillRoundRect(trackBounds.x, trackBounds.y + cy, cw, 4, 2, 2);
             
-            // Filled portion
-            int filledWidth = (int) ((double) (slider.getValue() - slider.getMinimum()) / 
-                                    (slider.getMaximum() - slider.getMinimum()) * cw);
+            // Porción llenada
+            int filledWidth = calculateFilledWidth(cw);
             g2d.setColor(GameConstants.COLOR_CYAN_NEON);
             g2d.fillRoundRect(trackBounds.x, trackBounds.y + cy, filledWidth, 4, 2, 2);
         }
@@ -56,20 +55,30 @@ public class CyberpunkSlider extends JSlider {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             
             Rectangle knobBounds = thumbRect;
-            int w = knobBounds.width;
-            int h = knobBounds.height;
-            
-            // Outer glow
+            paintThumbGlow(g2d, knobBounds);
+            paintThumbBody(g2d, knobBounds);
+            paintThumbHighlight(g2d, knobBounds);
+        }
+        
+        private int calculateFilledWidth(int totalWidth) {
+            double ratio = (double) (slider.getValue() - slider.getMinimum()) / 
+                          (slider.getMaximum() - slider.getMinimum());
+            return (int) (ratio * totalWidth);
+        }
+        
+        private void paintThumbGlow(Graphics2D g2d, Rectangle bounds) {
             g2d.setColor(new Color(5, 217, 232, 100));
-            g2d.fillOval(knobBounds.x - 2, knobBounds.y - 2, w + 4, h + 4);
-            
-            // Thumb
+            g2d.fillOval(bounds.x - 2, bounds.y - 2, bounds.width + 4, bounds.height + 4);
+        }
+        
+        private void paintThumbBody(Graphics2D g2d, Rectangle bounds) {
             g2d.setColor(GameConstants.COLOR_CYAN_NEON);
-            g2d.fillOval(knobBounds.x, knobBounds.y, w, h);
-            
-            // Inner highlight
+            g2d.fillOval(bounds.x, bounds.y, bounds.width, bounds.height);
+        }
+        
+        private void paintThumbHighlight(Graphics2D g2d, Rectangle bounds) {
             g2d.setColor(GameConstants.COLOR_TEXT_PRIMARY);
-            g2d.fillOval(knobBounds.x + 3, knobBounds.y + 3, w - 6, h - 6);
+            g2d.fillOval(bounds.x + 3, bounds.y + 3, bounds.width - 6, bounds.height - 6);
         }
     }
 }

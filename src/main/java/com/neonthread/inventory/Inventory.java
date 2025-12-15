@@ -2,9 +2,14 @@ package com.neonthread.inventory;
 
 import com.neonthread.Character;
 import com.neonthread.stats.Modifier;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Gestiona items del jugador.
+ * Usa Observer pattern para aplicar modifiers automáticamente.
+ */
 public class Inventory {
     private List<InventoryItem> items;
     private Character owner;

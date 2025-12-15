@@ -5,7 +5,6 @@ import com.neonthread.screens.*;
 import com.neonthread.stats.StatType;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * Clase principal del juego NEONTHREAD (KISS + DRY).
@@ -126,6 +125,11 @@ public class NeonThreadGame extends JFrame {
     }
     
     private void changeState(GameState newState) {
+        // Guardar el estado anterior antes de cambiar
+        if (currentState != null && currentState != newState) {
+            previousState = currentState;
+        }
+        
         // Limpiar estado anterior
         if (currentState != null) {
             cleanupCurrentState();
@@ -158,7 +162,7 @@ public class NeonThreadGame extends JFrame {
                 
             case STATE_SETTINGS:
                 getContentPane().add(settingsScreen);
-                settingsScreen.show();
+                settingsScreen.setVisible(true);
                 break;
                 
             case STATE_LOADING_RUN:
@@ -301,6 +305,18 @@ public class NeonThreadGame extends JFrame {
                 break;
             case STATE_MENU:
                 menuScreen.cleanup();
+                break;
+            case STATE_SETTINGS:
+            case STATE_LOADING_RUN:
+            case STATE_CHARACTER_CREATION:
+            case STATE_INTRO_NARRATIVE:
+            case STATE_DISTRICT_MAP:
+            case STATE_INVENTORY:
+            case STATE_MISSION_WINDOW:
+            case STATE_NARRATIVE_SCENE:
+            case STATE_RESULT_SCREEN:
+            case STATE_PAUSE:
+                // No cleanup needed for these states
                 break;
         }
     }

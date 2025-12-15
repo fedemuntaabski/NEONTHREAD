@@ -1,7 +1,6 @@
 package com.neonthread;
 
 import com.neonthread.stats.BaseAttributes;
-import com.neonthread.stats.DerivedCapabilities;
 import com.neonthread.stats.Modifier;
 import com.neonthread.stats.RuntimeStats;
 import com.neonthread.stats.StatType;

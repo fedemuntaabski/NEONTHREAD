@@ -6,7 +6,6 @@ import com.neonthread.inventory.Inventory;
 import com.neonthread.inventory.InventoryItem;
 import com.neonthread.stats.Modifier;
 import com.neonthread.ui.CyberpunkButton;
-import com.neonthread.ui.ThemeEngine;
 
 import javax.swing.*;
 import java.awt.*;

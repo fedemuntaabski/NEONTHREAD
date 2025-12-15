@@ -16,12 +16,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.io.IOException;
 import java.util.function.Consumer;
 
 /**
@@ -34,6 +28,7 @@ public class DistrictMapScreen extends JPanel {
     private final GameSettings settings;
     
     private JPanel statsPanel;
+    private JScrollPane statScrollPane;
     private DistrictMapPanel mapPanel;
     private JPanel bottomBar;
     private JPanel rightPanel;
@@ -112,7 +107,11 @@ public class DistrictMapScreen extends JPanel {
     private void buildUI() {
         // Panel lateral izquierdo: Stats del jugador
         statsPanel = createStatsPanel();
-        add(statsPanel, BorderLayout.WEST);
+        statScrollPane = new JScrollPane(statsPanel);
+        statScrollPane.setOpaque(false);
+        statScrollPane.getViewport().setOpaque(false);
+        statScrollPane.setBorder(null);
+        add(statScrollPane, BorderLayout.WEST);
         
         // Mapa central: Vista geométrica del distrito
         mapPanel = new DistrictMapPanel();
@@ -466,6 +465,10 @@ public class DistrictMapScreen extends JPanel {
         
         statsPanel.revalidate();
         statsPanel.repaint();
+        if (statScrollPane != null) {
+            statScrollPane.revalidate();
+            statScrollPane.repaint();
+        }
     }
     
     /**
@@ -497,10 +500,6 @@ public class DistrictMapScreen extends JPanel {
     /**
      * Agrega una etiqueta de stat (DRY).
      */
-    private void addStatLabel(JPanel panel, String text, Font font, Color color) {
-        addStatLabel(panel, text, font, color, null);
-    }
-
     private void addStatLabel(JPanel panel, String text, Font font, Color color, String tooltip) {
         JLabel label = new JLabel(text);
         label.setFont(font);
@@ -1026,7 +1025,6 @@ public class DistrictMapScreen extends JPanel {
             District district = session.getDistrict();
             if (district == null) return;
 
-            int index = 0;
             for (Mission mission : getRenderableMissions(district)) {
                 Point2D pos = getMissionWorldPosition(district, mission);
                 int x = (int) Math.round(pos.getX());
@@ -1083,8 +1081,6 @@ public class DistrictMapScreen extends JPanel {
                 }
 
                 g2d.setTransform(old);
-                
-                index++;
             }
         }
 
