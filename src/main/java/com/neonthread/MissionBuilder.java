@@ -98,6 +98,13 @@ public class MissionBuilder {
         return this;
     }
     
+    private boolean isTutorial = false;
+    
+    public MissionBuilder setTutorial(boolean isTutorial) {
+        this.isTutorial = isTutorial;
+        return this;
+    }
+    
     // ==================== REWARDS ====================
     
     public MissionBuilder setReward(int credits, String info) {
@@ -196,6 +203,7 @@ public class MissionBuilder {
         mission.setPriority(priority);
         mission.setUrgency(urgency);
         mission.setDifficulty(difficulty);
+        mission.setTutorial(isTutorial);
         
         if (defaultNextScene != null) {
             mission.setNextSceneId(defaultNextScene);

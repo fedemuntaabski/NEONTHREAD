@@ -10,6 +10,7 @@ import com.neonthread.NarrativeScene;
 import com.neonthread.NarrativeScene.*;
 import com.neonthread.stats.StatType;
 import com.neonthread.ui.CyberpunkButton;
+import com.neonthread.services.StatFeedbackService;
 
 import javax.swing.*;
 import java.awt.*;
@@ -310,8 +311,8 @@ public class NarrativeSceneScreen extends JPanel {
             history.incrementDecisions();
         }
         
-        // Evaluar checks
-        boolean passesChecks = option.pasaChecks(character);
+        // Evaluar checks y loggear feedback
+        boolean passesChecks = evaluateChecksWithFeedback(option, character);
         
         if (passesChecks) {
             // Registrar éxito
@@ -341,6 +342,58 @@ public class NarrativeSceneScreen extends JPanel {
                 // Sin escena de fallo, mostrar mensaje
                 session.getGameLog().add("Check fallido: no puedes realizar esa acción");
             }
+        }
+    }
+    
+    /**
+     * Evalúa los checks de una opción con feedback visual y logging.
+     */
+    private boolean evaluateChecksWithFeedback(SceneOption option, com.neonthread.Character character) {
+        if (option.getChecks().isEmpty()) {
+            return true;
+        }
+        
+        for (AttributeCheck check : option.getChecks()) {
+            boolean passed = check.evaluar(character);
+            
+            // Obtener valor efectivo según el tipo de stat
+            int effective = getEffectiveValue(character, check.getTipo());
+            
+            if (passed) {
+                StatFeedbackService.logSuccess(check.getTipo(), check.getValorMinimo(), effective);
+            } else {
+                StatFeedbackService.logFailure(check.getTipo(), check.getValorMinimo(), effective);
+                return false; // Falla en el primer check no pasado
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Obtiene el valor efectivo de un stat para feedback.
+     */
+    private int getEffectiveValue(com.neonthread.Character character, StatType tipo) {
+        switch (tipo) {
+            case INTELLIGENCE:
+            case PHYSICAL:
+            case PERCEPTION:
+            case CHARISMA:
+                return character.getEffectiveAttribute(tipo);
+            case HACK:
+            case COMBAT:
+            case STEALTH:
+            case NEGOTIATION:
+            case ANALYSIS:
+                return character.getEffectiveCapability(tipo);
+            case BATTERY: return character.getBattery();
+            case CREDITS: return character.getCredits();
+            case REPUTATION: return character.getReputation();
+            case KARMA: return character.getKarma();
+            case NOTORIETY: return character.getNotoriety();
+            case ENERGY: return character.getEnergy();
+            case HEALTH: return character.getHealth();
+            default: return 0;
         }
     }
     

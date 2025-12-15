@@ -33,6 +33,9 @@ public class Mission {
     private MissionPriority priority;
     private MissionUrgency urgency;
     
+    // Flags especiales
+    private boolean isTutorial = false; // Misión tutorial (siempre visible, no fallable)
+    
     // Legado (mantener compatibilidad)
     @Deprecated
     private List<String> unlocks; // Locaciones/NPCs que desbloquea
@@ -78,9 +81,11 @@ public class Mission {
     public MissionConsequences getConsequences() { return consequences; }
     public MissionPriority getPriority() { return priority; }
     public MissionUrgency getUrgency() { return urgency; }
+    public boolean isTutorial() { return isTutorial; }
     
     // Setters
     public void setRewardInfo(String rewardInfo) { this.rewardInfo = rewardInfo; }
+    public void setTutorial(boolean isTutorial) { this.isTutorial = isTutorial; }
     public void setStatus(MissionStatus status) { this.status = status; }
     public void setDifficulty(int difficulty) { this.difficulty = difficulty; }
     public void setNextSceneId(String nextSceneId) { this.nextSceneId = nextSceneId; }

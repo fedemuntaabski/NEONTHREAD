@@ -1,6 +1,7 @@
 package com.neonthread.screens;
 
 import com.neonthread.*;
+import com.neonthread.ui.TutorialHint;
 import com.neonthread.ui.CyberpunkButton;
 
 import javax.swing.*;
@@ -350,6 +351,8 @@ public class DistrictMapScreen extends JPanel {
             enteredDistrictOnce = true;
             applyDistrictMapConfig();
             maybeTriggerDistrictEvent();
+            // Mostrar hint de tutorial en primera entrada
+            showTutorialHint();
         }
 
         refreshStatsPanel();
@@ -357,6 +360,32 @@ public class DistrictMapScreen extends JPanel {
         refreshHistoryPanel();
         refreshContextPanel();
         mapPanel.refresh();
+    }
+    
+    /**
+     * Muestra el hint de tutorial al entrar al distrito por primera vez.
+     */
+    private void showTutorialHint() {
+        // Solo si hay misiones de tutorial disponibles
+        District district = session.getDistrict();
+        if (district != null) {
+            boolean hasTutorialMission = district.getAvailableMissions().stream()
+                .anyMatch(Mission::isTutorial);
+            
+            if (hasTutorialMission) {
+                TutorialHint hint = new TutorialHint("[ CLICK ★ TO VIEW MISSION ]");
+                hint.setBounds(
+                    getWidth() / 2 - 150,
+                    getHeight() - 100,
+                    300,
+                    50
+                );
+                
+                add(hint);
+                revalidate();
+                repaint();
+            }
+        }
     }
 
     public void refreshStatsOnly() {

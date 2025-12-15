@@ -269,6 +269,43 @@ Mensajes temporales de sistema e interferencias
 ### 🔸 Data Stream
 Mensajes aleatorios de interferencia de señal
 
+## ✨ Nuevas Features (FASE 1 - PULIDO CRÍTICO)
+
+### 🎯 Sistema de Transiciones Visuales
+- **TransitionOverlay**: Feedback visual suave entre pantallas clave
+- Mensajes contextuales durante transiciones:
+  - `INITIALIZING NEURAL LINK...` (Menu → Start Run)
+  - `CONNECTING TO THE NETWORK...` (Intro → District Map)
+  - `ACCESSING MISSION DATA...` (Map → Mission Window)
+- Fade-in/fade-out automático (150ms)
+
+### ✅ Confirmación de Personaje
+- **CharacterSummaryPanel**: Pantalla de resumen antes de iniciar run
+- Muestra:
+  - Nombre del operador
+  - Rol y descripción
+  - Atributos base con barras visuales
+  - Dificultad seleccionada
+- Botones CONFIRM RUN / EDIT para confirmar o volver
+- Validación visual con borde rojo si el nombre está vacío
+
+### 🎓 Tutorial Implícito
+- **TutorialHint**: Hints visuales no intrusivos
+- Primera misión marcada como tutorial (flag `isTutorial`)
+- Mensaje `[ CLICK ★ TO VIEW MISSION ]` al entrar al distrito
+- Auto-desaparece tras 10 segundos o al aceptar misión
+- Animación de pulse para llamar la atención
+
+### 📊 Feedback de Stats
+- **StatFeedbackService**: Sistema centralizado de feedback
+- Logs automáticos en GameLog:
+  - `✓ [INTELLIGENCE SUCCESS] 5/3`
+  - `✗ [PHYSICAL FAILED] 2/4`
+- Colores diferenciados:
+  - Cyan (#00FFE7) para éxitos
+  - Magenta (#FF00E6) para fallos
+- Feedback visible durante checks narrativos
+
 ## 🔮 Estado Actual
 
 ### ✅ Completado

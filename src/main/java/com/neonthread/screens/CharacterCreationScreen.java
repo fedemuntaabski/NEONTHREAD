@@ -312,6 +312,13 @@ public class CharacterCreationScreen extends JPanel {
         
         // Validación: al menos 1 carácter
         if (name.isEmpty()) {
+            // Feedback visual: borde rojo
+            nameField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.RED, 2),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)
+            ));
+            nameField.setToolTipText("⚠ Operator name cannot be empty");
+            
             JOptionPane.showMessageDialog(this, 
                 "You must enter a name for the operator.\n(Minimum 1 character)",
                 "Incomplete Data",
@@ -322,12 +329,39 @@ public class CharacterCreationScreen extends JPanel {
         Character.Role role = (Character.Role) roleCombo.getSelectedItem();
         Character.Difficulty difficulty = (Character.Difficulty) difficultyCombo.getSelectedItem();
         
-        // Crear personaje y comenzar sesión
+        // Crear personaje temporal
         Character character = new Character(name, role, difficulty);
-        GameSession.getInstance().startNewGame(character);
         
-        // Avanzar al intro narrativo con transición
-        onComplete.accept(GameState.STATE_INTRO_NARRATIVE);
+        // Mostrar pantalla de confirmación
+        showSummaryPanel(character);
+    }
+    
+    /**
+     * Muestra el panel de confirmación con resumen del personaje.
+     */
+    private void showSummaryPanel(Character character) {
+        removeAll();
+        
+        CharacterSummaryPanel summaryPanel = new CharacterSummaryPanel(
+            character,
+            () -> {
+                // CONFIRM RUN: Iniciar sesión de juego
+                GameSession.getInstance().startNewGame(character);
+                onComplete.accept(GameState.STATE_INTRO_NARRATIVE);
+            },
+            () -> {
+                // EDIT: Volver a creación de personaje
+                removeAll();
+                buildUI();
+                reset();
+                revalidate();
+                repaint();
+            }
+        );
+        
+        add(summaryPanel, BorderLayout.CENTER);
+        revalidate();
+        repaint();
     }
     
     /**

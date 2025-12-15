@@ -1,6 +1,7 @@
 package com.neonthread;
 
 import com.neonthread.screens.*;
+import com.neonthread.ui.TransitionOverlay;
 
 import com.neonthread.stats.StatType;
 
@@ -125,11 +126,68 @@ public class NeonThreadGame extends JFrame {
     }
     
     private void changeState(GameState newState) {
+        changeState(newState, false);
+    }
+    
+    private void changeState(GameState newState, boolean skipTransition) {
         // Guardar el estado anterior antes de cambiar
         if (currentState != null && currentState != newState) {
             previousState = currentState;
         }
         
+        // Determinar si debe mostrar transición
+        boolean shouldShowTransition = !skipTransition && shouldUseTransition(currentState, newState);
+        
+        if (shouldShowTransition) {
+            showTransitionAndChangeState(newState);
+        } else {
+            executeStateChange(newState);
+        }
+    }
+    
+    /**
+     * Determina si debe mostrarse una transición entre estados.
+     */
+    private boolean shouldUseTransition(GameState from, GameState to) {
+        // Transiciones en el flujo START RUN
+        if (from == GameState.STATE_MENU && to == GameState.STATE_LOADING_RUN) return true;
+        if (from == GameState.STATE_INTRO_NARRATIVE && to == GameState.STATE_DISTRICT_MAP) return true;
+        if (from == GameState.STATE_CHARACTER_CREATION && to == GameState.STATE_INTRO_NARRATIVE) return true;
+        
+        // Transiciones de gameplay
+        if (to == GameState.STATE_MISSION_WINDOW) return true;
+        if (to == GameState.STATE_NARRATIVE_SCENE) return true;
+        
+        return false;
+    }
+    
+    /**
+     * Obtiene el mensaje de transición apropiado.
+     */
+    private String getTransitionMessage(GameState to) {
+        switch (to) {
+            case STATE_LOADING_RUN: return "INITIALIZING NEURAL LINK...";
+            case STATE_INTRO_NARRATIVE: return "SYNCHRONIZING IDENTITY...";
+            case STATE_DISTRICT_MAP: return "CONNECTING TO THE NETWORK...";
+            case STATE_MISSION_WINDOW: return "ACCESSING MISSION DATA...";
+            case STATE_NARRATIVE_SCENE: return "LOADING SCENARIO...";
+            default: return "PROCESSING...";
+        }
+    }
+    
+    /**
+     * Muestra el overlay de transición y luego cambia el estado.
+     */
+    private void showTransitionAndChangeState(GameState newState) {
+        String message = getTransitionMessage(newState);
+        TransitionOverlay overlay = new TransitionOverlay(message);
+        overlay.show(getLayeredPane(), () -> executeStateChange(newState));
+    }
+    
+    /**
+     * Ejecuta el cambio de estado real (separado para reutilización).
+     */
+    private void executeStateChange(GameState newState) {
         // Limpiar estado anterior
         if (currentState != null) {
             cleanupCurrentState();

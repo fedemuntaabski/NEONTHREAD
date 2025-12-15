@@ -66,9 +66,17 @@ public class GameSession {
             )
             .setReward(500, "Datos encriptados")
             .setUrgency(Mission.MissionUrgency.NORMAL)
+            .setTutorial(true) // Marcar como tutorial
             .build();
             district.addMission(firstMission);
         } else {
+            // Marcar la primera misión como tutorial si no está marcada
+            if (!missions.isEmpty()) {
+                Mission firstMission = missions.get(0);
+                if (!firstMission.isTutorial()) {
+                    firstMission.setTutorial(true);
+                }
+            }
             for (Mission mission : missions) {
                 district.addMission(mission);
             }
