@@ -2,10 +2,12 @@ package com.neonthread;
 
 import com.neonthread.screens.*;
 import com.neonthread.ui.TransitionOverlay;
+import com.neonthread.ui.DebugOverlay;
 
 import com.neonthread.stats.StatType;
 
 import javax.swing.*;
+import java.awt.event.KeyEvent;
 
 /**
  * Clase principal del juego NEONTHREAD (KISS + DRY).
@@ -14,6 +16,7 @@ import javax.swing.*;
 public class NeonThreadGame extends JFrame {
     private GameState currentState;
     private GameState previousState; // Para pausa
+    private DebugOverlay debugOverlay; // FASE 3 Feature 12
     
     // Pantallas de inicio
     private BootstrapScreen bootstrapScreen;
@@ -91,6 +94,23 @@ public class NeonThreadGame extends JFrame {
                 handlePause();
             }
         });
+        
+        // F12 para debug overlay (FASE 3 Feature 12)
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0), "debug");
+        actionMap.put("debug", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                if (debugOverlay != null) {
+                    debugOverlay.toggleVisibility();
+                }
+            }
+        });
+        
+        // Inicializar debug overlay
+        GameSession session = GameSession.getInstance();
+        debugOverlay = new DebugOverlay(session);
+        getLayeredPane().add(debugOverlay, JLayeredPane.POPUP_LAYER);
+        debugOverlay.setBounds(10, 10, 400, 600);
     }
     
     private void handlePause() {

@@ -309,6 +309,7 @@ public class ResultScreen extends JPanel {
     
     /**
      * Applies rewards to the character (KISS).
+     * FASE 3 Feature 10: Auto-save tras aplicar recompensas.
      */
     private void applyRewards(Mission mission) {
         com.neonthread.Character character = session.getCharacter();
@@ -326,6 +327,12 @@ public class ResultScreen extends JPanel {
             if (district != null) {
                 district.unlockLocationById(unlockId);
             }
+        }
+        
+        // FASE 3 Feature 10: Auto-save al completar misión
+        boolean saved = com.neonthread.SaveGame.save(session);
+        if (saved) {
+            log.add(">>> PROGRESS AUTO-SAVED");
         }
         
         // Marcar misión completada

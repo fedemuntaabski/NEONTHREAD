@@ -19,6 +19,7 @@ public class GameSession {
     private UpgradeManager upgradeManager;
     private RunMemory runMemory;
     private DistrictModifier districtModifier;
+    private FactionReputation factionReputation; // FASE 3 Feature 11
     private final Set<String> completedMissions = new HashSet<>();
     
     private GameSession() {
@@ -26,6 +27,7 @@ public class GameSession {
         this.worldState = WorldState.getInstance();
         this.upgradeManager = new UpgradeManager();
         this.runMemory = new RunMemory();
+        this.factionReputation = new FactionReputation();
     }
     
     public static GameSession getInstance() {
@@ -61,6 +63,7 @@ public class GameSession {
         this.upgradeManager = new UpgradeManager();
         this.runMemory = new RunMemory();
         this.districtModifier = new DistrictModifier(district, worldState);
+        this.factionReputation.reset(); // FASE 3 Feature 11: Reset faction reputation
         
         this.gameLog.add("Sesión iniciada: " + character.getName());
         this.runMemory.recordSystemEvent("Run Started", 
@@ -119,6 +122,7 @@ public class GameSession {
     public WorldState getWorldState() { return worldState; }
     public RunMemory getRunMemory() { return runMemory; }
     public DistrictModifier getDistrictModifier() { return districtModifier; }
+    public FactionReputation getFactionReputation() { return factionReputation; } // FASE 3 Feature 11
     
     public void setCurrentMission(Mission mission) { this.currentMission = mission; }
     
