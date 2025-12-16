@@ -41,10 +41,19 @@ public class GameSession {
     
     /**
      * Inicia una nueva sesión de juego.
+     * FASE 3 Feature 9: Usa DistrictLoader para cargar distrito desde JSON.
      */
     public void startNewGame(Character character) {
         this.character = character;
-        this.district = new District("Distrito Theta-5");
+        
+        // FASE 3 Feature 9: Cargar distrito desde JSON
+        try {
+            this.district = com.neonthread.loaders.DistrictLoader.loadDistrict("theta_5");
+        } catch (Exception e) {
+            System.err.println("Error loading district: " + e.getMessage());
+            this.district = new District("Distrito Theta-5 (Fallback)");
+        }
+        
         this.currentMission = null;
         this.gameLog.clear();
         this.worldState.reset();

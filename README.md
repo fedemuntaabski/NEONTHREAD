@@ -2,7 +2,27 @@
 
 Un juego minimalista estilo Cyberpunk 2077 desarrollado en Java con Swing.
 
-## 🎨 Descripción
+## � Estado del Roadmap Técnico
+
+### ✅ FASE 1 - PULIDO CRÍTICO (100%)
+- ✅ TransitionOverlay: Sistema de transiciones visuales con fade
+- ✅ CharacterSummaryPanel: Confirmación explícita con validación
+- ✅ TutorialHint: Tutorial implícito sin tutorial formal
+- ✅ StatFeedbackService: Feedback visual de impacto de stats
+
+### ✅ FASE 2 - CONSISTENCIA Y PROFUNDIDAD (100%)
+- ✅ RunMemory: Sistema de recuerdos de decisiones/consecuencias
+- ✅ DistrictModifier: Consecuencias visuales en el distrito
+- ✅ IntroLoader: Variantes narrativas por rol y dificultad
+- ✅ MissionWindow: Risk assessment, outcomes y requisitos mejorados
+
+### 🔄 FASE 3 - ESCALABILIDAD (En progreso)
+- ⏳ Feature 9: Refactor completo a Data-Driven
+- ⏳ Feature 10: Sistema de Guardado de Run
+- ⏳ Feature 11: Sistema de Reputación Local
+- ⏳ Feature 12: Debug Overlay (modo dev)
+
+## �🎨 Descripción
 
 NEONTHREAD es un juego RPG cyberpunk desarrollado en Java con Swing, que combina narrativa interactiva con gestión de misiones, inventario y progresión de personaje. Con una estética minimalista neón y un sistema de estados robusto.
 

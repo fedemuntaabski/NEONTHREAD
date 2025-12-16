@@ -1,0 +1,66 @@
+[
+  {
+    "id": "theta_5",
+    "name": "Distrito Theta-5",
+    "description": "Sector bajo donde la ley corporativa no alcanza. Centro de operaciones independientes.",
+    "state": "operational",
+    "locations": [
+      {
+        "id": "loc_safehouse",
+        "name": "Safe House",
+        "type": "BASE",
+        "x": 200,
+        "y": 150,
+        "unlocked": true,
+        "description": "Tu base de operaciones. Aquí planificas misiones y gestionas equipo."
+      },
+      {
+        "id": "loc_black_market",
+        "name": "Black Market",
+        "type": "SHOP",
+        "x": 400,
+        "y": 250,
+        "unlocked": false,
+        "description": "Mercado clandestino. Equipo militar, implantes y datos corporativos."
+      },
+      {
+        "id": "loc_net_node",
+        "name": "Network Node",
+        "type": "HACK",
+        "x": 600,
+        "y": 180,
+        "unlocked": false,
+        "description": "Punto de acceso a la red corporativa. Hackeos de alto riesgo."
+      },
+      {
+        "id": "loc_fixer_den",
+        "name": "Fixer's Den",
+        "type": "INFO",
+        "x": 300,
+        "y": 350,
+        "unlocked": false,
+        "description": "Contacto con fixers. Misiones de reputación y contratos especiales."
+      }
+    ],
+    "zones": [
+      {
+        "id": "downtown",
+        "name": "Downtown Core",
+        "accessible": true,
+        "description": "Zona central del distrito. Actividad moderada."
+      },
+      {
+        "id": "undercity",
+        "name": "Undercity",
+        "accessible": true,
+        "description": "Túneles y sectores subterráneos. Peligroso pero lucrativo."
+      },
+      {
+        "id": "corporate_sector",
+        "name": "Corporate Sector",
+        "accessible": false,
+        "description": "Torres corporativas. Requiere acceso autorizado."
+      }
+    ]
+  }
+]

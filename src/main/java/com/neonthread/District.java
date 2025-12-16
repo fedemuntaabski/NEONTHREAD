@@ -7,12 +7,16 @@ import java.util.List;
  * Representa el distrito (mapa hub) del juego (KISS).
  */
 public class District {
+    private String id;  // FASE 3 Feature 9
     private String name;
+    private String description;  // FASE 3 Feature 9
     private List<Location> locations;
     private List<Mission> availableMissions;
     
     public District(String name) {
         this.name = name;
+        this.id = "default";
+        this.description = "";
         this.locations = new ArrayList<>();
         this.availableMissions = new ArrayList<>();
         initializeDefaultLocations();
@@ -25,10 +29,17 @@ public class District {
         locations.add(new Location("street_corner", "Esquina Urbana", LocationType.MISSION));
     }
     
+    public String getId() { return id; }
     public String getName() { return name; }
+    public String getDescription() { return description; }
     public List<Location> getLocations() { return locations; }
     public List<Mission> getAvailableMissions() { return availableMissions; }
     public List<Mission> getMissions() { return availableMissions; }
+    
+    // FASE 3 Feature 9: Setters para data-driven loading
+    public void setId(String id) { this.id = id; }
+    public void setDescription(String description) { this.description = description; }
+    public void addLocation(Location location) { this.locations.add(location); }
     
     public void addMission(Mission mission) {
         availableMissions.add(mission);
@@ -70,6 +81,7 @@ public class District {
     public static class Location {
         private String id;
         private String name;
+        private String description;  // FASE 3 Feature 9
         private LocationType type;
         private boolean unlocked;
         private int x; // Posición X en el mapa
@@ -82,6 +94,7 @@ public class District {
         public Location(String id, String name, LocationType type, int x, int y) {
             this.id = id;
             this.name = name;
+            this.description = "";
             this.type = type;
             this.x = x;
             this.y = y;
@@ -90,10 +103,14 @@ public class District {
         
         public String getId() { return id; }
         public String getName() { return name; }
+        public String getDescription() { return description; }
         public LocationType getType() { return type; }
         public boolean isUnlocked() { return unlocked; }
         public int getX() { return x; }
         public int getY() { return y; }
+        
+        // FASE 3 Feature 9: Setters para data-driven loading
+        public void setDescription(String description) { this.description = description; }
         public void setPosition(int x, int y) { this.x = x; this.y = y; }
         public void unlock() { this.unlocked = true; }
         public void lock() { this.unlocked = false; }
