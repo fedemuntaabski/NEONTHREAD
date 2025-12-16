@@ -209,6 +209,158 @@ public class MissionWindowPresenter {
     }
     
     /**
+     * FASE 2 Feature 8: Calcula nivel de riesgo basado en difficulty y urgency.
+     */
+    public String calculateRiskLevel(Mission mission) {
+        if (mission == null) return "UNKNOWN";
+        
+        int difficulty = mission.getDifficulty();
+        Mission.MissionUrgency urgency = mission.getUrgency();
+        
+        // Base risk por difficulty
+        int riskScore = difficulty * 10;
+        
+        // Modificador por urgency
+        switch (urgency) {
+            case CRITICAL: riskScore += 30; break;
+            case HIGH: riskScore += 15; break;
+            case NORMAL: break;
+            case LOW: riskScore -= 10; break;
+        }
+        
+        if (riskScore < 20) return "LOW";
+        if (riskScore < 40) return "MEDIUM";
+        if (riskScore < 65) return "HIGH";
+        return "CRITICAL";
+    }
+    
+    /**
+     * FASE 2 Feature 8: Color del risk level.
+     */
+    public Color getRiskLevelColor(String riskLevel) {
+        switch (riskLevel) {
+            case "LOW": return new Color(100, 255, 100);
+            case "MEDIUM": return GameConstants.COLOR_YELLOW_NEON;
+            case "HIGH": return new Color(255, 150, 50);
+            case "CRITICAL": return new Color(255, 50, 50);
+            default: return GameConstants.COLOR_TEXT_SECONDARY;
+        }
+    }
+    
+    /**
+     * FASE 2 Feature 8: Lista de factores de riesgo específicos.
+     */
+    public List<String> getRiskFactors(Mission mission) {
+        List<String> factors = new java.util.ArrayList<>();
+        if (mission == null) return factors;
+        
+        // Factores basados en dificultad
+        if (mission.getDifficulty() >= 5) {
+            factors.add("High complexity scenarios");
+        }
+        
+        // Factores basados en urgency
+        if (mission.getUrgency() == Mission.MissionUrgency.CRITICAL) {
+            factors.add("Time-sensitive operation");
+        }
+        
+        // Factores basados en requisitos
+        if (!mission.getRequirements().isEmpty()) {
+            factors.add("Requires previous mission completion");
+        }
+        
+        // Factor de tipo de misión
+        switch (mission.getType()) {
+            case COMBAT:
+                factors.add("Direct confrontation expected");
+                break;
+            case MAIN:
+                factors.add("Critical path objective");
+                break;
+            case INTEL:
+                factors.add("Information security breach");
+                break;
+        }
+        
+        if (factors.isEmpty()) {
+            factors.add("Standard operational risks");
+        }
+        
+        return factors;
+    }
+    
+    /**
+     * FASE 2 Feature 8: Posibles outcomes (parcialmente ocultos).
+     */
+    public List<String> getPossibleOutcomes(Mission mission) {
+        List<String> outcomes = new java.util.ArrayList<>();
+        if (mission == null) return outcomes;
+        
+        // Outcomes generales basados en tipo
+        switch (mission.getType()) {
+            case COMBAT:
+                outcomes.add("› Elimination completed");
+                outcomes.add("› Area secured");
+                break;
+            case INTEL:
+                outcomes.add("› Data extracted");
+                outcomes.add("› Intel recovered");
+                break;
+            case MAIN:
+                outcomes.add("› Critical objective achieved");
+                outcomes.add("› Story progression unlocked");
+                break;
+            case SIDE:
+                outcomes.add("› Optional objective completed");
+                outcomes.add("› Additional rewards earned");
+                break;
+            default:
+                outcomes.add("› Mission objectives achieved");
+        }
+        
+        // Hint de consecuencias narrativas
+        outcomes.add("› World state affected");
+        
+        return outcomes;
+    }
+    
+    /**
+     * FASE 2 Feature 8: Verifica si un requisito específico se cumple.
+     */
+    public boolean isRequirementMet(String requirement, GameSession session) {
+        // Si el requisito es un mission ID
+        return session.hasCompleted(requirement);
+    }
+    
+    /**
+     * FASE 2 Feature 8: Razón detallada de bloqueo.
+     */
+    public String getBlockReason(Mission mission) {
+        if (mission == null) return "Mission not found";
+        
+        com.neonthread.Character character = session.getCharacter();
+        
+        // Verificar misiones previas requeridas
+        for (String requiredId : mission.getRequirements()) {
+            if (!session.hasCompleted(requiredId)) {
+                return "⛓ Requires completion of: " + requiredId;
+            }
+        }
+        
+        // Verificar spawn conditions
+        Mission.SpawnConditions conditions = mission.getSpawnConditions();
+        if (conditions.getMinReputation() > 0) {
+            int currentRep = session.getWorldState().getReputation();
+            if (currentRep < conditions.getMinReputation()) {
+                return "Requires Reputation ≥ " + conditions.getMinReputation() + 
+                       " (current: " + currentRep + ")";
+            }
+        }
+        
+        return "Requirements not met";
+    }
+    
+    /**
      * Helper para traducción.
      */
     private String t(String key) {

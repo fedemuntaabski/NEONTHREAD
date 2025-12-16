@@ -311,6 +311,7 @@ public class Mission {
         private List<String> forbiddenFlags = new ArrayList<>();
         private String requiredDistrictState = null;
         
+        // Setters
         public void setMinReputation(int min) { this.minReputation = min; }
         public void setMaxReputation(int max) { this.maxReputation = max; }
         public void setMinNotoriety(int min) { this.minNotoriety = min; }
@@ -320,6 +321,12 @@ public class Mission {
         public void addRequiredFlag(String flag) { this.requiredFlags.add(flag); }
         public void addForbiddenFlag(String flag) { this.forbiddenFlags.add(flag); }
         public void setRequiredDistrictState(String state) { this.requiredDistrictState = state; }
+        
+        // Getters (FASE 2 Feature 8)
+        public int getMinReputation() { return minReputation; }
+        public int getMaxReputation() { return maxReputation; }
+        public List<String> getRequiredFlags() { return requiredFlags; }
+        public List<String> getForbiddenFlags() { return forbiddenFlags; }
         
         public boolean isMet(WorldState worldState, Character character) {
             if (worldState == null) return true;

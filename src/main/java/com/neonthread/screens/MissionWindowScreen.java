@@ -63,9 +63,13 @@ public class MissionWindowScreen extends JPanel {
             .addVerticalSpace(15)
             .addContent(createInfoBadges(mission))
             .addVerticalSpace(15)
+            .addContent(createRiskSection(mission))  // FASE 2 Feature 8
+            .addVerticalSpace(15)
             .addContent(createRewardsSection(mission))
             .addVerticalSpace(15)
             .addContent(createRequirementsSection(mission))
+            .addVerticalSpace(15)
+            .addContent(createOutcomesSection(mission))  // FASE 2 Feature 8
             .addVerticalSpace(20)
             .addSeparator()
             .addVerticalSpace(15)
@@ -212,9 +216,64 @@ public class MissionWindowScreen extends JPanel {
         List<String> requirements = new ArrayList<>();
         presenter.populateRequirements(mission, requirements);
         
+        // FASE 2 Feature 8: Iconografía mejorada
+        GameSession session = GameSession.getInstance();
         for (String req : requirements) {
-            section.addItem(req, GameConstants.COLOR_TEXT_PRIMARY);
+            boolean met = presenter.isRequirementMet(req, session);
+            Color color = met ? new Color(100, 255, 100) : new Color(255, 100, 100);
+            String icon = met ? "✓" : "✗";
+            section.addItem(icon + " " + req, color);
         }
+        
+        // Si hay misiones previas requeridas
+        if (!mission.getRequirements().isEmpty()) {
+            boolean locked = !presenter.canAcceptMission(mission);
+            if (locked) {
+                section.addItem("⛓ LOCKED BY PREVIOUS RUN", new Color(255, 150, 50));
+            }
+        }
+        
+        return section;
+    }
+    
+    /**
+     * FASE 2 Feature 8: Sección de nivel de riesgo.
+     */
+    private JComponent createRiskSection(Mission mission) {
+        MissionSection section = new MissionSection.Builder()
+            .title("⚠ RISK ASSESSMENT")
+            .build();
+        
+        // Calcular nivel de riesgo basado en difficulty y urgency
+        String riskLevel = presenter.calculateRiskLevel(mission);
+        Color riskColor = presenter.getRiskLevelColor(riskLevel);
+        
+        section.addItem("Risk Level: " + riskLevel, riskColor);
+        
+        // Factores de riesgo específicos
+        List<String> riskFactors = presenter.getRiskFactors(mission);
+        for (String factor : riskFactors) {
+            section.addItem("• " + factor, GameConstants.COLOR_TEXT_SECONDARY);
+        }
+        
+        return section;
+    }
+    
+    /**
+     * FASE 2 Feature 8: Sección de posibles outcomes (parcialmente ocultos).
+     */
+    private JComponent createOutcomesSection(Mission mission) {
+        MissionSection section = new MissionSection.Builder()
+            .title("◆ POSSIBLE OUTCOMES")
+            .build();
+        
+        List<String> outcomes = presenter.getPossibleOutcomes(mission);
+        for (String outcome : outcomes) {
+            section.addItem(outcome, new Color(150, 150, 200));
+        }
+        
+        // Hint de que hay más outcomes ocultos
+        section.addItem("[???] Hidden consequences...", new Color(80, 80, 100));
         
         return section;
     }
@@ -232,10 +291,11 @@ public class MissionWindowScreen extends JPanel {
         acceptButton.setPreferredSize(new Dimension(200, 45));
         acceptButton.addActionListener(e -> handleAcceptMission(mission));
         
-        // Deshabilitar botón si no cumple requisitos
+        // FASE 2 Feature 8: Tooltip mejorado con requisitos específicos
         if (!presenter.canAcceptMission(mission)) {
             acceptButton.setEnabled(false);
-            acceptButton.setToolTipText(t("mission.error.requirements"));
+            String detailedReason = presenter.getBlockReason(mission);
+            acceptButton.setToolTipText(detailedReason);
         }
         
         CyberpunkButton cancelButton = new CyberpunkButton(t("mission.cancel"));
