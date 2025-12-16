@@ -16,11 +16,11 @@ Un juego minimalista estilo Cyberpunk 2077 desarrollado en Java con Swing.
 - ✅ IntroLoader: Variantes narrativas por rol y dificultad
 - ✅ MissionWindow: Risk assessment, outcomes y requisitos mejorados
 
-### 🔄 FASE 3 - ESCALABILIDAD (En progreso)
-- ⏳ Feature 9: Refactor completo a Data-Driven
-- ⏳ Feature 10: Sistema de Guardado de Run
-- ⏳ Feature 11: Sistema de Reputación Local
-- ⏳ Feature 12: Debug Overlay (modo dev)
+### ✅ FASE 3 - ESCALABILIDAD (100%)
+- ✅ Feature 9: Data-Driven Districts con DistrictLoader + districts.json
+- ✅ Feature 10: Sistema de Guardado de Run con SaveGame + auto-save
+- ✅ Feature 11: Sistema de Reputación Local con FactionReputation (6 facciones)
+- ✅ Feature 12: Debug Overlay (F12) con DEV_MODE gate
 
 ## �🎨 Descripción
 
